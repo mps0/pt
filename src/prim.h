@@ -31,3 +31,23 @@ private:
     Vec3 m_center;
     float m_radius;
 };
+
+class Plane : public Prim
+{
+public:
+    Plane(Material* mat, Vec3 center, Vec3 normal, Vec3 up, Vec2 extents) :
+        Prim(mat),
+        m_center(center),
+        m_normal(normal),
+        m_up(up),
+        m_extents(extents)
+    {}
+
+    virtual Intersection Intersect(const Ray& ray) override;
+
+private:
+    Vec3 m_center;
+    Vec3 m_normal;
+    Vec3 m_up;
+    Vec2 m_extents;
+};
