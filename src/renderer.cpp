@@ -1,29 +1,34 @@
 #include "renderer.h"
 
+
 Pixel Renderer::Intersect(Ray& ray, Scene& scene)
 {
     const std::vector<std::unique_ptr<Prim>>& prims = scene.getPrims();
-    float t = FLT_MAX;
-    bool hit = false;
+    Intersection rInter{false, FLT_MAX, Vec3(), Vec3(), nullptr};
     for(const std::unique_ptr<Prim>& p : prims)
     {
-        std::pair<bool, float> inter = p->Intersect(ray);
-        if(inter.first)
+        Intersection inter = p->Intersect(ray);
+        if(inter.hit)
         {
-            hit = true;
-            t = inter.second;
+            rInter = inter;
         }
     }
 
-
-    if(hit)
+    if(rInter.hit && (rInter.mat != nullptr))
     {
-        return Pixel(1.f, 0.f, 0.f, 1.f);
-    }
-    else
-    {
-        return Pixel(0.f, 0.f, 0.f, 1.f);
+        Vec3 albedo = rInter.mat->eval();
+        Vec3 color = Vec3(0.f, 0.f, 0.f);
+
+        // sample light
+        const std::vector<std::unique_ptr<Light>>& lights = scene.getLights();
+        for(const std::unique_ptr<Light>& l : lights)
+        {
+            color = color + albedo *  l->eval(rInter.hitPoint);
+        }
+
+        return Pixel(color.x, color.y, color.z, 1.f);
     }
 
+    return Pixel(0.f, 0.f, 0.f, 1.f);
 }
 

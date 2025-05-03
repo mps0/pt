@@ -19,7 +19,7 @@ private:
 
     uint64_t getBufIdx(uint32_t i, uint32_t j);
 
-    Pixel* m_buf;
+    uint32_t* m_buf;
     uint32_t m_width;
     uint32_t m_height;
     bool m_init;

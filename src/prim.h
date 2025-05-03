@@ -2,22 +2,30 @@
 
 #include <cfloat>
 #include <cmath>
+
 #include "ray.h"
+#include "material.h"
+#include "intersection.h"
 
 class Prim
 {
 public:
-    virtual std::pair<bool, float> Intersect(const Ray& ray) = 0;
+    Prim(Material* mat) : m_mat(mat) {}
+    virtual Intersection Intersect(const Ray& ray) = 0;
+
+ public:
+    Material* m_mat;
 };
 
 class Sphere : public Prim
 {
 public:
-    Sphere(Vec3 center, float radius) :
+    Sphere(Material* mat, Vec3 center, float radius) :
+        Prim(mat),
         m_center(center),
         m_radius(radius) {}
 
-    virtual std::pair<bool, float> Intersect(const Ray& ray) override;
+    virtual Intersection Intersect(const Ray& ray) override;
 
 private:
     Vec3 m_center;

@@ -15,7 +15,7 @@ Window::Window(uint32_t width, uint32_t height) :
     }
     m_init = true;
 
-    m_buf = reinterpret_cast<Pixel*>(calloc(m_width * m_height, sizeof(Pixel)));
+    m_buf = reinterpret_cast<uint32_t*>(calloc(m_width * m_height, sizeof(uint32_t)));
 }
 
 Window::~Window()
@@ -44,7 +44,12 @@ bool Window::waitAndSync()
 void Window::writePixel(uint32_t i, uint32_t j, Pixel v)
 {
     uint64_t bufIdx = getBufIdx(i, j);
-    m_buf[bufIdx] = v;
+
+    uint32_t bgra = v.b;
+    bgra|= v.g << 8;
+    bgra|= v.r << 16;
+    bgra|= v.a << 24;
+    m_buf[bufIdx] = bgra;
 }
 
 uint64_t Window::getBufIdx(uint32_t i, uint32_t j)

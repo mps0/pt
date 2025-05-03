@@ -1,7 +1,7 @@
 #include "prim.h"
 
 
-std::pair<bool, float> Sphere::Intersect(const Ray& ray)
+Intersection Sphere::Intersect(const Ray& ray)
 {
     Vec3 oc = ray.o - m_center;
     float a = dot(ray.d, ray.d);
@@ -11,11 +11,14 @@ std::pair<bool, float> Sphere::Intersect(const Ray& ray)
 
     if(descrim < 0.0f)
     {
-        return {false, FLT_MAX};
+        return {false, FLT_MAX, Vec3(), Vec3(), nullptr};
     }
 
     float t = (-b - std::sqrtf(descrim)) / (2.f * a);
 
-    return {true, t};
+    Vec3 hitPoint = ray.o + t * ray.d;
+    Vec3 normal = hitPoint - m_center;
+
+    return {true, t, hitPoint, normal, m_mat};
 }
 
