@@ -8,9 +8,9 @@
 //TODO FOV?
 
 constexpr float ASPECT_RATIO = 1.66f;
-constexpr float RES_Y = 200.f;
+constexpr float RES_Y = 600.f;
 constexpr float RES_X = RES_Y * ASPECT_RATIO;
-constexpr uint32_t SAMPLES_PER_PIXEL = 2500;
+constexpr uint32_t SAMPLES_PER_PIXEL = 250;
 constexpr uint32_t MAX_DEPTH = 5;
 
 int main()
@@ -25,7 +25,7 @@ int main()
     ColorMaterial test0({0.33f, 1.f, 0.f});
     ColorMaterial test1({1.f, 0.33f, 0.f});
 
-    EmissiveMaterial white(Vec3(1.0f));
+    EmissiveMaterial white(Vec3(3.0f));
 
     Scene scene;
     scene.addPrim(std::make_unique<Sphere>(&test0, Vec3(-1.0f, -1.f, -5.0f), 0.5f));
