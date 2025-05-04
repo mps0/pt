@@ -1,6 +1,8 @@
 #include <cstdio>
 #include <iostream>
 
+#include<iostream>
+
 #include "material.h"
 #include "vec.h"
 #include "ray.h"
@@ -19,18 +21,22 @@ int main()
     ColorMaterial green({0.f, 1.f, 0.f});
     ColorMaterial blue({0.f, 0.f, 1.f});
 
-    EmissiveMaterial white(Vec3(1.f));
+    ColorMaterial test0({0.33f, 1.f, 0.f});
+    ColorMaterial test1({1.f, 0.33f, 0.f});
+
+    EmissiveMaterial white(Vec3(0.5f));
 
     Scene scene;
-    scene.addPrim(std::make_unique<Sphere>(&red, Vec3(-1.0f, 0.f, -3.5f), 0.5f));
-    scene.addPrim(std::make_unique<Sphere>(&blue, Vec3(0.0f, 0.5f, -3.5f), 0.3f));
-    scene.addPrim(std::make_unique<Rectangle>(&white, Vec3(0.0f, 1.0f, -3.5f), Vec3(0.f, -1.f, 0.f), Vec3(0.f, 0.f, 1.f), Vec2(1.0f, 1.0f)));
+    //scene.addPrim(std::make_unique<Sphere>(&test0, Vec3(-2.0f, 0.f, -3.5f), 0.75f));
+    scene.addPrim(std::make_unique<Sphere>(&test1, Vec3(1.0f, 0.0f, -3.5f), 0.75f));
+    scene.addPrim(std::make_unique<Rectangle>(&white, Vec3(0.0f, 1.5f, -3.5f), Vec3(0.f, -1.f, 0.f), Vec3(0.f, 1.f, 0.f), Vec2(1.5f, 1.5f)));
 
     Window win(RES_X, RES_Y);
     Renderer  r(6);
 
     for(uint32_t i = 0; i < RES_Y; ++i)
     {
+        std::cout << "ROW: " << i << "/" << RES_Y - 1<< std::endl;
         for(uint32_t j = 0; j < RES_X; ++j)
         {
             float pixelsPerUnitLength = RES_Y;
@@ -45,16 +51,16 @@ int main()
             ray.o = Vec3(0.f, 0.f, 0.f);
             ray.d = normalize(pix_pos - cam_pos);
 
-            uint32_t numSamples = 25;
+            uint32_t numSamples = 5;
             Vec3 res = Vec3(0.0f);
-            for(int k = 0; k < numSamples ; ++k)
+            for(uint32_t k = 0; k < numSamples ; ++k)
             {
                 res = res + r.Intersect(ray, scene);
             }
 
             res = (1.0f / numSamples) * res;
 
-            win.writePixel(i, j,  Pixel(res, 1.0f));
+            win.writePixel(i, j,  Pixel(clampZeroToOne(res), 1.0f));
         }
     }
 

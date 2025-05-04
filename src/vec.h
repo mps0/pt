@@ -152,6 +152,18 @@ float dot(Vec<N> v, Vec<N> u)
 }
 
 template <uint8_t N>
+Vec<N> clampZeroToOne(Vec<N> v)
+{
+    Vec<N> res(0.f);
+    for(uint8_t i = 0; i < N; ++i)
+    {
+        res[i] = std::min(std::max(v[i], 0.0f), 1.0f);
+    }
+
+    return res;
+}
+
+template <uint8_t N>
 float length(Vec<N> v)
 {
     return std::sqrt(dot(v, v));
@@ -161,6 +173,16 @@ template <uint8_t N>
 Vec<N> normalize(Vec<N> v)
 {
     return v * (1.0f / length(v));
+}
+
+
+inline Vec<3> cross(Vec<3> u, Vec<3> v)
+{
+    return Vec<3>(
+        u.y * v.z - u.z * v.y,
+        u.z * v.x - u.x * v.z,
+        u.x * v.y - u.y * v.x
+    );
 }
 
 template <uint8_t N>

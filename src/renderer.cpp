@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "sampler.h"
+#include "vec.h"
 
 Vec3 Renderer::Intersect(Ray& ray, Scene& scene)
 {
@@ -8,7 +9,6 @@ Vec3 Renderer::Intersect(Ray& ray, Scene& scene)
 
 Vec3 Renderer::traceRay(const Ray& ray, const Scene& scene, uint32_t depth)
 {
-    // TODO... pdf?
     Vec3 Lo = Vec3(0.0f);
     if (depth > m_maxDepth)
     {
@@ -32,6 +32,10 @@ Vec3 Renderer::traceRay(const Ray& ray, const Scene& scene, uint32_t depth)
         //emissive
         if(rInter.mat->getFlags() & Material::EMISSIVE)
         {
+            if(depth ==1)
+            {
+                return Lo;
+            }
             Vec3 Le = rInter.mat->evalLe(rInter.hitPoint, ray.d);
 
             Lo = Lo + Le;
@@ -43,10 +47,31 @@ Vec3 Renderer::traceRay(const Ray& ray, const Scene& scene, uint32_t depth)
             RandomSample<Vec3> samp = Sampler::the().sampleUnifrmHemisphere();
 
             Ray outRay;
-            outRay.o = rInter.hitPoint + C_EPS * rInter.normal;
-            outRay.d = normalize(rInter.normal + samp.sample);
+            outRay.o = rInter.hitPoint + 0.01f * rInter.normal;
+            //samp is in tangent space...
+            //vect perpinduclar to Normal...
+            //dot(N,T) = 0
+            //NxTx + NyTy + NzTz = 0
+            //Let x = 0.3, y =0 ,3
+            //Tz = -(NxTx + NyTy)/(Nz)
+            //
+            //T = normalize(Tx, Ty, Tz);
+            //
+            //B =  cross(T, N)
+            //
+            Vec3 helper = abs(rInter.normal.z < 0.99f) ? Vec3(0.0f, 0.0f, 1.0f) : Vec3(0.0, 1.0f, 0.0f);
+            Vec3 T = normalize(cross(helper, rInter.normal));
+            Vec3 B = normalize(cross(rInter.normal, T));
+
+            Vec3 sampWS;
+            sampWS.x = dot(samp.sample, T);
+            sampWS.y = dot(samp.sample, rInter.normal);
+            sampWS.z = dot(samp.sample, B);
+
+            //outRay.d = sampWS;
+            outRay.d = rInter.normal;
             //bounce
-            return albedo * traceRay(outRay, scene, depth + 1) * samp.InvPDF;
+            return albedo * traceRay(outRay, scene, depth + 1) * samp.InvPDF * dot(rInter.normal, outRay.d);
         }
     }
 
