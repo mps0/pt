@@ -1,7 +1,7 @@
 #include <thread>
 
-#include "renderer.h"
 #include "sampler.h"
+#include "renderer.h"
 #include "vec.h"
 
 void Renderer::render()
@@ -9,8 +9,8 @@ void Renderer::render()
     // Launch threads
     int numThreads = std::thread::hardware_concurrency();
 
-    uint32_t tileWidth = 50;
-    uint32_t tileHeight = 50;
+    uint32_t tileWidth = 10;
+    uint32_t tileHeight = 10;
 
     uint32_t ii = 0;
     while(ii < m_win.getHeight()) 
@@ -51,8 +51,11 @@ void Renderer::renderPixel(const Tile& tile)
             for(uint32_t k = 0; k < m_samplesPerPixel; ++k)
             {
                 float pixelsPerUnitLength = m_win.getHeight();
-                float x = (float(j) + 0.5f - 0.5f * m_win.getWidth()) / pixelsPerUnitLength;
-                float y = (float(i) + 0.5f - 0.5f * m_win.getHeight()) / pixelsPerUnitLength;
+                float xOffset = Sampler::the().sampleUniformUnitInterval();
+                float yOffset = Sampler::the().sampleUniformUnitInterval();
+
+                float x = (float(j) + xOffset - 0.5f * m_win.getWidth()) / pixelsPerUnitLength;
+                float y = (float(i) + yOffset - 0.5f * m_win.getHeight()) / pixelsPerUnitLength;
                 y *= -1.f;
 
                 Vec3 cam_pos = Vec3(0.f, 0.f, 0.f);

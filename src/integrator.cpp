@@ -42,7 +42,7 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, uint32_t depth)
         {
             Vec3 albedo = rInter.mat->eval();
 
-            RandomSample<Vec3> samp = Sampler::the().sampleUnifrmHemisphere();
+            RandomSample<Vec3> samp = Sampler::the().sampleUniformHemisphere();
 
             Ray outRay;
             outRay.o = rInter.hitPoint + C_EPS * rInter.normal;

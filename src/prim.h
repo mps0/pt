@@ -38,19 +38,24 @@ private:
 class Rectangle : public Prim
 {
 public:
-    Rectangle(Material* mat, Vec3 center, Vec3 normal, Vec3 up, Vec2 extents, std::string name = "Rectangle") :
+    Rectangle(Material* mat, Vec3 center, Vec3 u, Vec3 v, float width, float height, std::string name = "Rectangle") :
         Prim(mat, name),
         m_center(center),
-        m_normal(normal),
-        m_up(up),
-        m_extents(extents)
-    {}
+        m_u(normalize(u)),
+        m_v(normalize(v)),
+        m_width(width),
+        m_height(height)
+        {
+            m_normal = normalize(cross(m_u, m_v));
+        }
 
     virtual Intersection Intersect(const Ray& ray) override;
 
 private:
     Vec3 m_center;
     Vec3 m_normal;
-    Vec3 m_up;
-    Vec2 m_extents;
+    Vec3 m_u;
+    Vec3 m_v;
+    float m_width;
+    float m_height;
 };

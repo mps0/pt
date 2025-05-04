@@ -31,17 +31,23 @@ public:
         return singleton;
     }
 
-    RandomSample<Vec3> sampleUnifrmHemisphere()
+    RandomSample<Vec3> sampleUniformHemisphere()
     {
         float r0 = m_distrib(m_generator);
         float r1 = m_distrib(m_generator);
 
         float z = r0;
         float r = std::sqrt(1.f - z * z);
-        float phi = 2.0f * 3.141592f * r1;
+        float phi = 2.0f * C_PI * r1;
 
-        return {Vec3(r * std::cos(phi), r * std::sin(phi), z),  (4.f * C_PI)};
+        return {Vec3(r * std::cos(phi), r * std::sin(phi), z),  (2.f * C_PI)};
     }
+
+    float sampleUniformUnitInterval()
+    {
+        return m_distrib(m_generator);
+    }
+    
 
 private:
 

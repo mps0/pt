@@ -45,14 +45,13 @@ Intersection Rectangle::Intersect(const Ray& ray)
 
     Vec3 hitPoint = ray.o + t * ray.d;
 
-    //TODO
-    //Vec3 relHitPoint = hitPoint - 
-    //for now assume Y is along Z, and X is along X, and normal is straight down
-    
-    Vec2 relHitPoint = Vec2(m_center.x, m_center.z) -  Vec2(hitPoint.x, hitPoint.z);
-    Vec2 halfExtents = 0.5f * m_extents;
+    Vec3 pc = hitPoint - m_center;
 
-    if(std::abs(relHitPoint.x) > halfExtents.x || std::abs(relHitPoint.y) >  halfExtents.y)
+    Vec2 hitPointOS;
+    hitPointOS.x = dot(pc, m_u);
+    hitPointOS.y = dot(pc, m_v);
+
+    if(std::abs(hitPointOS.x) > 0.5f * m_width || std::abs(hitPointOS.y) >  0.5f * m_height)
     {
         return Intersection::NoHit;
     }
