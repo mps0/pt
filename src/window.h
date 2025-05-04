@@ -14,6 +14,8 @@ public:
     bool update();
     bool waitAndSync();
     void writePixel(uint32_t i, uint32_t j, Pixel v);
+    uint32_t getHeight() { return m_height; }
+    uint32_t getWidth() { return m_width;  }
 
 private:
 

@@ -40,7 +40,7 @@ public:
         float r = std::sqrt(1.f - z * z);
         float phi = 2.0f * 3.141592f * r1;
 
-        return {Vec3(r * std::cos(phi), r * std::sin(phi), z),  (4.f * C_PI)};
+        return {Vec3(r * std::cos(phi), z, r * std::sin(phi)),  (4.f * C_PI)};
     }
 
 private:

@@ -1,18 +1,37 @@
 #pragma once
 
-#include "ray.h"
-#include "pixel.h"
+#include <mutex>
+#include <queue>
+
+#include "window.h"
 #include "scene.h"
+#include "integrator.h"
 
 class Renderer
 {
 public:
-    Renderer(uint32_t maxDepth) :  m_maxDepth(maxDepth) {}
-    Vec3 Intersect(Ray& ray, Scene& scene);
+    Renderer(Window& win, Scene& scene, Integrator& integrator, uint32_t samplesPerPixel) : m_win(win), m_scene(scene), m_integrator(integrator), m_samplesPerPixel(samplesPerPixel) {}
+
+    void render();
 
 private:
-    Vec3 traceRay(const Ray& ray, const Scene& scene, uint32_t depth);
+    struct Tile
+    {
+        uint32_t i0;
+        uint32_t j0;
+        uint32_t width;
+        uint32_t height;
+    };
+
+    void renderPixel(const Tile& tile);
+    void worker();
 
 
-    uint32_t m_maxDepth;
+    Window& m_win;
+    Scene& m_scene;
+    Integrator& m_integrator;
+    uint32_t m_samplesPerPixel;
+
+    std::mutex m_queueMutex;
+    std::queue<Tile> m_tileQueue;
 };

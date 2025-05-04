@@ -1,79 +1,88 @@
+#include <thread>
+
 #include "renderer.h"
 #include "sampler.h"
 #include "vec.h"
 
-Vec3 Renderer::Intersect(Ray& ray, Scene& scene)
+void Renderer::render()
 {
-    return traceRay(ray, scene, 0);
+    // Launch threads
+    int numThreads = std::thread::hardware_concurrency();
+
+    uint32_t tileWidth = 50;
+    uint32_t tileHeight = 50;
+
+    uint32_t ii = 0;
+    while(ii < m_win.getHeight()) 
+    {
+        uint32_t jj = 0;
+        while(jj < m_win.getWidth())
+        {
+            uint32_t th = ii + tileHeight > m_win.getHeight() ?  m_win.getHeight() - ii : tileHeight;
+            uint32_t tw = jj + tileWidth > m_win.getWidth() ?  m_win.getWidth() - jj : tileWidth;
+            m_tileQueue.push({ii, jj, tw, th});
+            jj += tileWidth;
+        }
+        ii += tileHeight;
+    }
+
+    // Launch threads
+    std::vector<std::thread> threads;
+
+    for (int i = 0; i < numThreads; ++i) {
+        threads.emplace_back(&Renderer::worker, this);
+    }
+
+    for (auto& t : threads) 
+    {
+        t.join();
+    }
+
+    std::cout << "Rendering complete.\n";
 }
 
-Vec3 Renderer::traceRay(const Ray& ray, const Scene& scene, uint32_t depth)
+void Renderer::renderPixel(const Tile& tile)
 {
-    Vec3 Lo = Vec3(0.0f);
-    if (depth > m_maxDepth)
-    {
-        return Lo;
-    }
+    for (uint32_t i = tile.i0; i < tile.i0 + tile.height; ++i) {
+        for (uint32_t j = tile.j0; j < tile.j0 + tile.width; ++j) {
 
-    const std::vector<std::unique_ptr<Prim>>& prims = scene.getPrims();
-    Intersection rInter{false, FLT_MAX, Vec3(), Vec3(), nullptr};
-    for(const std::unique_ptr<Prim>& p : prims)
-    {
-        Intersection inter = p->Intersect(ray);
-        if(inter.hit && inter.t < rInter.t)
-        {
-            rInter = inter;
-        }
-    }
-
-    if(rInter.hit && (rInter.mat != nullptr))
-    {
-
-        //emissive
-        if(rInter.mat->getFlags() & Material::EMISSIVE)
-        {
-            if(depth ==1)
+            Vec3 res = Vec3(0.0f);
+            // TODO clean this up....
+            for(uint32_t k = 0; k < m_samplesPerPixel; ++k)
             {
-                return Lo;
+                float pixelsPerUnitLength = m_win.getHeight();
+                float x = (float(j) + 0.5f - 0.5f * m_win.getWidth()) / pixelsPerUnitLength;
+                float y = (float(i) + 0.5f - 0.5f * m_win.getHeight()) / pixelsPerUnitLength;
+                y *= -1.f;
+
+                Vec3 cam_pos = Vec3(0.f, 0.f, 0.f);
+                Vec3 pix_pos = Vec3(x, y, -1.f);
+
+                Ray ray;
+                ray.o = Vec3(0.f, 0.f, 0.f);
+                ray.d = normalize(pix_pos - cam_pos);
+                res = res + m_integrator.Intersect(ray, m_scene);
             }
-            Vec3 Le = rInter.mat->evalLe(rInter.hitPoint, ray.d);
 
-            Lo = Lo + Le;
-        }
-        else //temp
-        {
-            Vec3 albedo = rInter.mat->eval();
+            res = (1.0f / m_samplesPerPixel) * res;
 
-            RandomSample<Vec3> samp = Sampler::the().sampleUnifrmHemisphere();
-
-            Ray outRay;
-            outRay.o = rInter.hitPoint + 0.01f * rInter.normal;
-            //samp is in tangent space...
-            //vect perpinduclar to Normal...
-            //dot(N,T) = 0
-            //NxTx + NyTy + NzTz = 0
-            //Let x = 0.3, y =0 ,3
-            //Tz = -(NxTx + NyTy)/(Nz)
-            //
-            //T = normalize(Tx, Ty, Tz);
-            //
-            //B =  cross(T, N)
-            //
-            Vec3 helper = abs(rInter.normal.z < 0.99f) ? Vec3(0.0f, 0.0f, 1.0f) : Vec3(0.0, 1.0f, 0.0f);
-            Vec3 T = normalize(cross(helper, rInter.normal));
-            Vec3 B = normalize(cross(rInter.normal, T));
-
-            Vec3 sampWS;
-            sampWS.x = dot(samp.sample, T);
-            sampWS.y = dot(samp.sample, rInter.normal);
-            sampWS.z = dot(samp.sample, B);
-
-            //outRay.d = sampWS;
-            outRay.d = rInter.normal;
-            //bounce
-            return albedo * traceRay(outRay, scene, depth + 1) * samp.InvPDF * dot(rInter.normal, outRay.d);
+            m_win.writePixel(i, j,  Pixel(clampZeroToOne(res), 1.0f));
         }
     }
+}
 
-    return Lo;
+void Renderer::worker()
+{
+    while (true) {
+        Tile tile;
+        {
+            std::lock_guard<std::mutex> lock(m_queueMutex);
+            if (m_tileQueue.empty()) return; // no work left
+            tile = m_tileQueue.front();
+            m_tileQueue.pop();
+        }
+
+        std::cout << "REMAINING TILES: " << m_tileQueue.size() << std::endl;
+        renderPixel(tile);
+    }
 }
