@@ -1,11 +1,5 @@
-#include <iostream>
-#include <mutex>
-#include <thread>
-#include <queue>
-
 #include "material.h"
 #include "vec.h"
-#include "ray.h"
 #include "window.h"
 #include "renderer.h"
 #include "scene.h"
@@ -14,7 +8,6 @@
 constexpr float ASPECT_RATIO = 1.66f;
 constexpr float RES_Y = 600.f;
 constexpr float RES_X = RES_Y * ASPECT_RATIO;
-
 
 int main()
 {

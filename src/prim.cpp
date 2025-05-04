@@ -14,14 +14,7 @@ Intersection Sphere::Intersect(const Ray& ray)
     {
         return Intersection::NoHit;
     }
-    //-b - blah < 0
-    //b + blah >0
-    //b must be < (-blah)
-    //-b must be > (sqrtf)
 
-    // need (-b - z) > 0
-    // so: -b > z
-    // so b <= -z
     float sqrtDescrim = std::sqrtf(descrim);
 
     float temp = b <= -sqrtDescrim ? (-b - sqrtDescrim) : (-b + sqrtDescrim);
