@@ -11,7 +11,7 @@ public:
         EMISSIVE = 1
     };
 
-    Material() : m_flags(0) {}
+    Material(std::string name) : m_name(name), m_flags(0) {}
     virtual Vec3 eval() = 0;
     virtual Vec3 evalLe(Vec3 p, Vec3 wo)
     {
@@ -23,14 +23,17 @@ public:
         return m_flags;
     }
 
+    const std::string& getName(){ return m_name; };
+
 protected:
+    std::string m_name;
     uint32_t m_flags;
 };
 
 class ColorMaterial : public Material
 {
 public:
-    ColorMaterial(Vec3 albedo) : m_color(albedo) {}
+    ColorMaterial(Vec3 albedo, std::string name = "ColorMaterial") : Material(name), m_color(albedo) {}
     virtual Vec3 eval() override
     {
         return m_color;
@@ -43,7 +46,7 @@ private:
 class EmissiveMaterial : public Material
 {
 public:
-    EmissiveMaterial(Vec3 color) : m_color(color) 
+    EmissiveMaterial(Vec3 color, std::string name = "EmissiveMaterial") : Material(name), m_color(color) 
     {
         m_flags |= EMISSIVE;
     }

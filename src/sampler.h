@@ -2,13 +2,20 @@
 
 #include <random>
 
+#include "defs.h"
 #include "vec.h"
+
+template <typename T>
+struct RandomSample
+{
+    T sample;
+    float InvPDF;
+};
 
 
 class Sampler
 {
 public:
-
 
     Sampler() :
         m_generator(std::random_device()()),
@@ -17,15 +24,14 @@ public:
 
     }
 
-    Sampler& the()
+    static Sampler& the()
     {
         static Sampler singleton;
-
 
         return singleton;
     }
 
-    Vec3 sampleUnifrmHemisphere()
+    RandomSample<Vec3> sampleUnifrmHemisphere()
     {
         float r0 = m_distrib(m_generator);
         float r1 = m_distrib(m_generator);
@@ -34,7 +40,7 @@ public:
         float r = std::sqrt(1.f - z * z);
         float phi = 2.0f * 3.141592f * r1;
 
-        return {r * std::cos(phi), r * std::sin(phi), z};
+        return {Vec3(r * std::cos(phi), r * std::sin(phi), z),  (4.f * C_PI)};
     }
 
 private:

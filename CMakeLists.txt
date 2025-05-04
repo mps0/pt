@@ -22,3 +22,7 @@ add_executable( ${PROJECT_NAME}
 find_package(OpenGL REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE minifb::minifb)
+
+target_compile_options(${PROJECT_NAME} PRIVATE
+    -Wall -Wextra -Wpedantic
+)

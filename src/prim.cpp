@@ -14,11 +14,26 @@ Intersection Sphere::Intersect(const Ray& ray)
     {
         return Intersection::NoHit;
     }
+    //-b - blah < 0
+    //b + blah >0
+    //b must be < (-blah)
+    //-b must be > (sqrtf)
 
-    float t = (-b - std::sqrtf(descrim)) / (2.f * a);
+    // need (-b - z) > 0
+    // so: -b > z
+    // so b <= -z
+    float sqrtDescrim = std::sqrtf(descrim);
+
+    float temp = b <= -sqrtDescrim ? (-b - sqrtDescrim) : (-b + sqrtDescrim);
+    float t = temp / (2.f * a);
+
+    if(t < 0.f)
+    {
+        return Intersection::NoHit;
+    }
 
     Vec3 hitPoint = ray.o + t * ray.d;
-    Vec3 normal = hitPoint - m_center;
+    Vec3 normal = normalize(hitPoint - m_center);
 
     return {true, t, hitPoint, normal, m_mat};
 }

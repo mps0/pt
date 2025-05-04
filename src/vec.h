@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 
@@ -148,6 +149,18 @@ float dot(Vec<N> v, Vec<N> u)
     }
 
     return res;
+}
+
+template <uint8_t N>
+float length(Vec<N> v)
+{
+    return std::sqrt(dot(v, v));
+}
+
+template <uint8_t N>
+Vec<N> normalize(Vec<N> v)
+{
+    return v * (1.0f / length(v));
 }
 
 template <uint8_t N>

@@ -7,10 +7,12 @@
 class Renderer
 {
 public:
-    Pixel Intersect(Ray& ray, Scene& scene);
+    Renderer(uint32_t maxDepth) :  m_maxDepth(maxDepth) {}
+    Vec3 Intersect(Ray& ray, Scene& scene);
 
 private:
+    Vec3 traceRay(const Ray& ray, const Scene& scene, uint32_t depth);
 
 
-
+    uint32_t m_maxDepth;
 };
