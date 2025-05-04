@@ -16,6 +16,7 @@ Pixel Renderer::Intersect(Ray& ray, Scene& scene)
 
     if(rInter.hit && (rInter.mat != nullptr))
     {
+        Vec3 Lo;
         //Vec3 albedo = rInter.mat->eval();
         //Vec3 color = Vec3(0.f, 0.f, 0.f);
 
@@ -27,8 +28,19 @@ Pixel Renderer::Intersect(Ray& ray, Scene& scene)
         //}
 
         //return Pixel(color.x, color.y, color.z, 1.f);
-        Vec3 albedo = rInter.mat->eval();
-        return Pixel(albedo.x, albedo.y, albedo.z, 1.f);
+        //Vec3 albedo = rInter.mat->eval();
+        //return Pixel(albedo.x, albedo.y, albedo.z, 1.f);
+        //
+        //
+        //emissive
+        if(rInter.mat->getFlags() & Material::EMISSIVE)
+        {
+            Vec3 Le = rInter.mat->evalLe(rInter.hitPoint, ray.d);
+
+            Lo = Lo + Le;
+        }
+
+        return Pixel(Lo, 1.f);
     }
 
     return Pixel(0.f, 0.f, 0.f, 1.f);

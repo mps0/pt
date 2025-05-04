@@ -23,7 +23,7 @@ Intersection Sphere::Intersect(const Ray& ray)
     return {true, t, hitPoint, normal, m_mat};
 }
 
-Intersection Plane::Intersect(const Ray& ray)
+Intersection Rectangle::Intersect(const Ray& ray)
 {
     float denom = dot(ray.d, m_normal);
     if(denom >= 0.f)

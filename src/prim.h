@@ -32,10 +32,10 @@ private:
     float m_radius;
 };
 
-class Plane : public Prim
+class Rectangle : public Prim
 {
 public:
-    Plane(Material* mat, Vec3 center, Vec3 normal, Vec3 up, Vec2 extents) :
+    Rectangle(Material* mat, Vec3 center, Vec3 normal, Vec3 up, Vec2 extents) :
         Prim(mat),
         m_center(center),
         m_normal(normal),

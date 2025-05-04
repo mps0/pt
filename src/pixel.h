@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "vec.h"
+
 // why does minifb expect gbra? ordering
 struct Pixel
 {
@@ -16,6 +18,14 @@ struct Pixel
         r = static_cast<uint8_t>(_r * 255.f);
         g = static_cast<uint8_t>(_g * 255.f);
         b = static_cast<uint8_t>(_b * 255.f);
+        a = static_cast<uint8_t>(_a * 255.f);
+    }
+
+    Pixel(Vec3 v, float _a)
+    {
+        r = static_cast<uint8_t>(v.x * 255.f);
+        g = static_cast<uint8_t>(v.y * 255.f);
+        b = static_cast<uint8_t>(v.z * 255.f);
         a = static_cast<uint8_t>(_a * 255.f);
     }
 };

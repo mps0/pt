@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <iostream>
 
+#include "material.h"
 #include "vec.h"
 #include "ray.h"
 #include "window.h"
@@ -18,10 +19,12 @@ int main()
     ColorMaterial green({0.f, 1.f, 0.f});
     ColorMaterial blue({0.f, 0.f, 1.f});
 
+    EmissiveMaterial white(Vec3(1.f));
+
     Scene scene;
     scene.addPrim(std::make_unique<Sphere>(&red, Vec3(-1.0f, 0.f, -3.5f), 0.5f));
     scene.addPrim(std::make_unique<Sphere>(&blue, Vec3(0.0f, 0.5f, -3.5f), 0.3f));
-    scene.addPrim(std::make_unique<Plane>(&green, Vec3(0.0f, 1.0f, -3.5f), Vec3(0.f, -1.f, 0.f), Vec3(0.f, 0.f, 1.f), Vec2(0.5f, 0.5f)));
+    scene.addPrim(std::make_unique<Rectangle>(&white, Vec3(0.0f, 1.0f, -3.5f), Vec3(0.f, -1.f, 0.f), Vec3(0.f, 0.f, 1.f), Vec2(0.5f, 0.5f)));
 
     scene.addLight(std::make_unique<PointLight>(Vec3(0.f, 3.f, -3.5f), 3.f, Vec3(1.f)));
 

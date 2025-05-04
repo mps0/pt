@@ -1,5 +1,6 @@
 #pragma once
 
+#include "prim.h"
 #include "vec.h"
 
 class Light
@@ -24,6 +25,21 @@ public:
     }
 
 private:
+    Vec3 m_pos;
+    Vec3 m_color;
+    float m_intensity;
+};
+
+class AreaLight : public Light
+{
+    virtual Vec3 eval(Vec3 p) override
+    {
+        return m_intensity * m_color;
+    }
+
+private:
+
+    Rectangle m_rect;
     Vec3 m_pos;
     Vec3 m_color;
     float m_intensity;
