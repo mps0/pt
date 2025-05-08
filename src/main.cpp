@@ -10,7 +10,7 @@
 constexpr float ASPECT_RATIO = 1.66f;
 constexpr float RES_Y = 600.f;
 constexpr float RES_X = RES_Y * ASPECT_RATIO;
-constexpr uint32_t SAMPLES_PER_PIXEL = 250;
+constexpr uint32_t SAMPLES_PER_PIXEL = 250000;
 constexpr uint32_t MAX_DEPTH = 5;
 
 int main()
@@ -21,6 +21,7 @@ int main()
 
     ColorMaterial grey({0.25f, 0.25f, 0.25f});
     ColorMaterial darkGrey({0.1f, 0.1f, 0.1f});
+    ColorMaterial lightBrown({0.78f, 0.64f, 0.52f});
 
     ColorMaterial test0({0.33f, 1.f, 0.f});
     ColorMaterial test1({1.f, 0.33f, 0.f});
@@ -41,23 +42,20 @@ int main()
     scene.addPrim(std::make_unique<Rectangle>(&grey, Vec3(1.5f, 0.f, -5.0f), Vec3(0.f, 0.f, 1.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.f));
 
     //floor wall
-    scene.addPrim(std::make_unique<Rectangle>(&darkGrey, Vec3(0.0f, -1.5f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, -1.f), 3.0f, 4.f));
+    scene.addPrim(std::make_unique<Rectangle>(&darkGrey, Vec3(0.0f, -2.0f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, -1.f), 3.0f, 4.f));
+
+    //Ceiling wall
+    scene.addPrim(std::make_unique<Rectangle>(&lightBrown, Vec3(0.0f, 2.0f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, 1.f), 3.0f, 4.f));
 
 
     // light
-    scene.addPrim(std::make_unique<Rectangle>(&white, Vec3(0.0f, 1.5f, -3.5f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, 1.f), 1.f, 1.f));
+    scene.addPrim(std::make_unique<Rectangle>(&white, Vec3(0.0f, 1.5f, -3.5f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, 1.f), 0.75f, 0.75f));
 
     Window win(RES_X, RES_Y);
     Integrator integrator(MAX_DEPTH);
     Renderer renderer(win, scene, integrator, SAMPLES_PER_PIXEL);
 
     renderer.render();
-
-    do {
-        if (!win.update()) {
-            break;
-        }
-    } while(win.waitAndSync());
 
     return 0;
 }

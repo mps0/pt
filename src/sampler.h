@@ -31,6 +31,17 @@ public:
         return singleton;
     }
 
+    RandomSample<Vec2> sampleUniformDisc()
+    {
+        float r0 = m_distrib(m_generator);
+        float r1 = m_distrib(m_generator);
+
+        float r = std::sqrt(r0);
+        float phi = r1 * C_2PI;
+
+        return {Vec2(r * std::cos(phi), r * std::sin(phi)), C_PI};
+    }
+
     RandomSample<Vec3> sampleUniformHemisphere()
     {
         float r0 = m_distrib(m_generator);
@@ -40,7 +51,22 @@ public:
         float r = std::sqrt(1.f - z * z);
         float phi = 2.0f * C_PI * r1;
 
-        return {Vec3(r * std::cos(phi), r * std::sin(phi), z),  (2.f * C_PI)};
+        return {Vec3(r * std::cos(phi), r * std::sin(phi), z),  C_2PI};
+    }
+
+    RandomSample<Vec3> sampleCosineHemisphere()
+    {
+        // Sample disc
+        float r0 = m_distrib(m_generator);
+        float r1 = m_distrib(m_generator);
+
+        float r = std::sqrt(r0);
+        float phi = r1 * C_2PI;
+
+        float theta = std::asin(r);
+
+        // Project to hemisphere (Malley's method)
+        return {Vec3(r * std::cos(phi), r * std::sin(phi), std::sqrt(1.0f - r * r)), C_PI / std::cos(theta)};
     }
 
     float sampleUniformUnitInterval()

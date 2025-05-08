@@ -41,6 +41,11 @@ bool Window::waitAndSync()
     return mfb_wait_sync(m_win);
 }
 
+Pixel Window::readPixel(uint32_t i, uint32_t j)
+{
+    return *reinterpret_cast<Pixel*>(&(m_buf[getBufIdx(i, j)]));
+}
+
 void Window::writePixel(uint32_t i, uint32_t j, Pixel v)
 {
     uint64_t bufIdx = getBufIdx(i, j);
