@@ -43,55 +43,18 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
 
     // NEE
     bool materialReflects = length(rInter.mat->getAlbedo()) > 0.0f ? true : false;
-
     if(materialReflects)
     {
-        std::vector<Light*> lights = scene.getLights();
-        for(Light* l : lights)
-        {
-
-            Vec3 adjHitPoint = rInter.hitPoint + rInter.normal * C_EPS;
-            Light::Sample lightSample = l->sample();
-            Vec3 lightVec = lightSample.wP - adjHitPoint;
-
-            Ray lightRay;
-            lightRay.o = adjHitPoint;
-            lightRay.d = normalize(lightVec);
-
-            float tLight = length(lightVec);
-            bool inShadow = false;
-            for(Prim* p : prims)
-            {
-                Intersection lightInter = p->Intersect(lightRay);
-
-                if(lightInter.hit && (lightInter.t < tLight))
-                {
-                    inShadow = true;
-                    break;
-                }
-            }
-
-            if(!inShadow)
-            {
-                // NEE
-                Lo = Lo + l->eval(lightSample, rInter.hitPoint) * dot(rInter.normal, lightRay.d) * lightSample.invPDF * rInter.mat->evalBrdf(lightRay.d, ray.d, rInter.hitPoint);
-            }
-        }
+        Lo = Lo + computeDirectLigting(ray, scene, rInter);
     }
 
-
-    RandomSample<Vec3> samp = Sampler::the().sampleCosineHemisphere();
     Ray outRay;
-    outRay.o = rInter.hitPoint + C_EPS * rInter.normal;
-    Vec3 helper = std::abs(rInter.normal.z) < 0.99f ? Vec3(0.0f, 0.0f, 1.0f) : Vec3(0.0, 1.0f, 0.0f);
-    Vec3 T = normalize(cross(helper, rInter.normal));
-    Vec3 B = normalize(cross(rInter.normal, T));
-    Vec3 sampWS = samp.sample.x * T + samp.sample.y * B + samp.sample.z * rInter.normal;
-    outRay.d = normalize(sampWS);
+    float outRayInvPdf;
+    makeHemisphereRay(rInter.hitPoint, rInter.normal, outRay, outRayInvPdf);
 
     Vec3 brdf = rInter.mat->evalBrdf(outRay.d, ray.d, rInter.hitPoint);
 
-    Vec3 temp = brdf * throughput * dot(rInter.normal, outRay.d) * samp.invPDF;
+    Vec3 temp = brdf * throughput * dot(rInter.normal, outRay.d) * outRayInvPdf;
     throughput = throughput * temp;
 
     float zeta = Sampler::the().sampleUniformUnitInterval();
@@ -102,6 +65,58 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         //bounce
         Lo = Lo + (temp * traceRay(outRay, scene, throughput, depth + 1)) * (1.0f / p);
     }
-
     return Lo;
+}
+
+bool Integrator::queryVisibility(const Ray& ray, const Scene& scene, float tMax)
+{
+    std::vector<Prim*> prims = scene.getPrims();
+    for(Prim* p : scene.getPrims())
+    {
+        Intersection lightInter = p->Intersect(ray);
+
+        if(lightInter.hit && (lightInter.t <= tMax))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+Vec3 Integrator::computeDirectLigting(const Ray& ray, const Scene& scene, const Intersection& inter)
+{
+    std::vector<Light*> lights = scene.getLights();
+
+    Vec3 Li = Vec3(0.0f);
+    for(Light* l : lights)
+    {
+
+        Vec3 adjHitPoint = inter.hitPoint + inter.normal * C_EPS;
+        Light::Sample lightSample = l->sample();
+        Vec3 lightVec = lightSample.wP - adjHitPoint;
+
+        Ray lightRay;
+        lightRay.o = adjHitPoint;
+        lightRay.d = normalize(lightVec);
+
+        if(queryVisibility(lightRay, scene, length(lightVec)))
+        {
+            // NEE
+            Li = Li + l->eval(lightSample, inter.hitPoint) * dot(inter.normal, lightRay.d) * lightSample.invPDF * inter.mat->evalBrdf(lightRay.d, ray.d, inter.hitPoint);
+        }
+    }
+    return Li;
+}
+
+void Integrator::makeHemisphereRay(const Vec3& o, const Vec3& normal, Ray& outRay, float& invPdf)
+{
+    RandomSample<Vec3> samp = Sampler::the().sampleCosineHemisphere();
+    outRay.o = o + C_EPS * normal;
+    Vec3 helper = std::abs(normal.z) < 0.99f ? Vec3(0.0f, 0.0f, 1.0f) : Vec3(0.0, 1.0f, 0.0f);
+    Vec3 T = normalize(cross(helper, normal));
+    Vec3 B = normalize(cross(normal, T));
+    Vec3 sampWS = samp.sample.x * T + samp.sample.y * B + samp.sample.z * normal;
+    outRay.d = normalize(sampWS);
+
+    invPdf = samp.invPDF;
 }

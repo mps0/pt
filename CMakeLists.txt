@@ -11,6 +11,7 @@ add_executable( ${PROJECT_NAME}
     src/integrator.cpp
     src/integrator.h
     src/intersection.h
+    src/light.cpp
     src/light.h
     src/main.cpp
     src/material.cpp

@@ -1,11 +1,7 @@
 #pragma once
 
-#include <memory>
-
-#include "defs.h"
 #include "material.h"
 #include "prim.h"
-#include "sampler.h"
 #include "vec.h"
 
 class Light
@@ -51,17 +47,8 @@ public:
         m_pos(pos)
     {}
 
-    virtual Sample sample()  override
-    {
-        return {Vec2(0.f), 1.0f, m_pos};
-    }
-
-    virtual Vec3 eval(Sample sample, Vec3 p) override
-    {
-        Vec3 v = sample.wP - p;
-
-        return  m_mat->evalLe() * (1.0f / (1.0f +  dot(v, v))) * sample.invPDF;
-    }
+    virtual Sample sample()  override;
+    virtual Vec3 eval(Sample sample, Vec3 p) override;
 
 private:
     Vec3 m_pos;
@@ -88,30 +75,9 @@ public:
     {
     }
 
-    Prim* getPrim() override
-    {
-        return reinterpret_cast<Prim*>(m_rect);
-    }
-
-    virtual Sample sample() override
-    {
-        RandomSample<Vec2> surfaceSample = m_rect->sampleSurface();
-        Vec3 wP = surfaceSample.sample.x * m_rect->m_u + surfaceSample.sample.y * m_rect->m_v + m_rect->m_center;
-        return {surfaceSample.sample, surfaceSample.invPDF, wP};
-    }
-
-    virtual Vec3 eval(Sample sample, Vec3 p) override
-    {
-        Vec3 v = sample.wP - p;
-        float cosL = -dot(m_rect->m_normal, normalize(v));
-
-        if(cosL > 0.0f)
-        {
-            return m_mat->evalLe() * (1.0f / (1.0f + dot(v, v))) * sample.invPDF;
-        }
-
-        return Vec3(0.f);
-    }
+    Prim* getPrim() override;
+    virtual Sample sample() override;
+    virtual Vec3 eval(Sample sample, Vec3 p) override;
 
 private:
     Rectangle* m_rect;

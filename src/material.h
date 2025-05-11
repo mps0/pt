@@ -15,22 +15,10 @@ public:
     Material(std::string name, Vec3 albedo) : m_name(name), m_albedo(albedo), m_flags(0) {}
     virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) = 0;
 
-    virtual Vec3 evalLe()
-    {
-        return Vec3(0.f);
-    }
-
-    Vec3 getAlbedo()
-    {
-        return m_albedo;
-    }
-
-    const uint32_t getFlags()
-    {
-        return m_flags;
-    }
-
-    const std::string& getName(){ return m_name; };
+    virtual Vec3 evalLe();
+    Vec3 getAlbedo();
+    uint32_t getFlags();
+    const std::string& getName();
 
 protected:
     std::string m_name;
@@ -42,10 +30,7 @@ class LambertianMaterial : public Material
 {
 public:
     LambertianMaterial(Vec3 albedo, std::string name = "LambertianMaterial") : Material(name, albedo), m_color(albedo) {}
-    virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override
-    {
-        return m_color * C_INV_PI;
-    }
+    virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override;
 
 private:
     Vec3 m_color;
@@ -59,15 +44,9 @@ public:
         m_flags |= EMISSIVE;
     }
 
-    virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override
-    {
-        return 0.0f;
-    }
+    virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override;
 
-    virtual Vec3 evalLe() override
-    {
-        return m_color * m_intensity;
-    }
+    virtual Vec3 evalLe() override;
 
 private:
     Vec3 m_color;
