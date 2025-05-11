@@ -1,3 +1,4 @@
+#include "light.h"
 #include "material.h"
 #include "vec.h"
 #include "window.h"
@@ -10,46 +11,61 @@
 constexpr float ASPECT_RATIO = 1.66f;
 constexpr float RES_Y = 600.f;
 constexpr float RES_X = RES_Y * ASPECT_RATIO;
-constexpr uint32_t SAMPLES_PER_PIXEL = 250000;
+constexpr uint32_t SAMPLES_PER_PIXEL = 1000;
 constexpr uint32_t MAX_DEPTH = 5;
 
 int main()
 {
-    ColorMaterial red({1.f, 0.f, 0.f});
-    ColorMaterial green({0.f, 1.f, 0.f});
-    ColorMaterial blue({0.f, 0.f, 1.f});
+    LambertianMaterial red({1.f, 0.f, 0.f});
+    LambertianMaterial green({0.f, 1.f, 0.f});
+    LambertianMaterial blue({0.f, 0.f, 1.f});
 
-    ColorMaterial grey({0.25f, 0.25f, 0.25f});
-    ColorMaterial darkGrey({0.1f, 0.1f, 0.1f});
-    ColorMaterial lightBrown({0.78f, 0.64f, 0.52f});
+    LambertianMaterial lightGrey({0.5f, 0.5f, 0.5f});
+    LambertianMaterial grey({0.25f, 0.25f, 0.25f});
+    LambertianMaterial darkGrey({0.1f, 0.1f, 0.1f});
+    LambertianMaterial lightBrown({0.78f, 0.64f, 0.52f});
 
-    ColorMaterial test0({0.33f, 1.f, 0.f});
-    ColorMaterial test1({1.f, 0.33f, 0.f});
-
-    EmissiveMaterial white(Vec3(3.0f));
+    LightMaterial whiteLightMat(Vec3(1.0f), 5.0f);
+    LightMaterial yellowLightMat(Vec3(1.0f, 1.0f, 0.0f), 2.5f);
+    LightMaterial purpleLightMat(Vec3(1.0f, 0.0f, 1.0f), 2.5f);
 
     Scene scene;
-    scene.addPrim(std::make_unique<Sphere>(&test0, Vec3(-1.0f, -1.f, -5.0f), 0.5f));
-    scene.addPrim(std::make_unique<Sphere>(&test1, Vec3(0.75f, -0.75f, -5.0f), 0.75f));
-
+    //Spheres
+    Sphere sphere0 = Sphere(&red, Vec3(-1.0f, 0.0f, -5.0f), 0.5f);
+    Sphere sphere1 = Sphere(&green, Vec3(0.5f, -1.5f, -5.0f), 0.75f);
+    //Walls
     //left wall
-    scene.addPrim(std::make_unique<Rectangle>(&grey, Vec3(-1.5f, 0.f, -5.0f), Vec3(0.f, 0.f, -1.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.0f));
-
+    Rectangle leftWall = Rectangle(&lightGrey, Vec3(-1.5f, 0.f, -5.0f), Vec3(0.f, 0.f, -1.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.0f);
     //back wall
-    scene.addPrim(std::make_unique<Rectangle>(&grey, Vec3(0.0f, 0.f, -6.5f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.f));
-
+    Rectangle backWall = Rectangle(&lightGrey, Vec3(0.0f, 0.f, -6.5f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.f);
     //right wall
-    scene.addPrim(std::make_unique<Rectangle>(&grey, Vec3(1.5f, 0.f, -5.0f), Vec3(0.f, 0.f, 1.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.f));
+    Rectangle rightWall = Rectangle(&lightGrey, Vec3(1.5f, 0.f, -5.0f), Vec3(0.f, 0.f, 1.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.f);
 
-    //floor wall
-    scene.addPrim(std::make_unique<Rectangle>(&darkGrey, Vec3(0.0f, -2.0f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, -1.f), 3.0f, 4.f));
+    //floor
+    Rectangle floor = Rectangle(&grey, Vec3(0.0f, -2.0f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, -1.f), 3.0f, 4.f);
+    //ceiling
+    Rectangle ceiling = Rectangle(&lightBrown, Vec3(0.0f, 2.0f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, 1.f), 3.0f, 4.f);
 
-    //Ceiling wall
-    scene.addPrim(std::make_unique<Rectangle>(&lightBrown, Vec3(0.0f, 2.0f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, 1.f), 3.0f, 4.f));
-
+    scene.addPrim(&sphere0);
+    scene.addPrim(&sphere1);
+    scene.addPrim(&leftWall);
+    scene.addPrim(&backWall);
+    scene.addPrim(&rightWall);
+    scene.addPrim(&floor);
+    scene.addPrim(&ceiling);
 
     // light
-    scene.addPrim(std::make_unique<Rectangle>(&white, Vec3(0.0f, 1.5f, -3.5f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, 1.f), 0.75f, 0.75f));
+    Rectangle lightPrim = Rectangle(&whiteLightMat, Vec3(0.0f, 1.99f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, 1.f), 1.00f, 1.00f);
+    RectangleLight rectLight(&whiteLightMat, &lightPrim);
+    PointLight pointLight0(&yellowLightMat, Vec3(-1.0f, 1.99f, -4.5f));
+    PointLight pointLight1(&purpleLightMat, Vec3(1.0f, 1.99f, -6.0f));
+    PointLight pointLight2(&whiteLightMat, Vec3(0.0f, 1.99f, -5.0f));
+    scene.addLight(&rectLight);
+    scene.addLight(&pointLight0);
+    scene.addLight(&pointLight1);
+    //scene.addLight(&pointLight2);
+
+
 
     Window win(RES_X, RES_Y);
     Integrator integrator(MAX_DEPTH);

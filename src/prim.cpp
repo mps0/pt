@@ -1,7 +1,6 @@
 #include "prim.h"
 #include "vec.h"
 
-
 Intersection Sphere::Intersect(const Ray& ray)
 {
     Vec3 oc = ray.o - m_center;
@@ -58,4 +57,12 @@ Intersection Rectangle::Intersect(const Ray& ray)
     
 
     return {true, t, hitPoint, m_normal, m_mat};
+}
+
+RandomSample<Vec2> Rectangle::sampleSurface()
+{
+    float x = (Sampler::the().sampleUniformUnitInterval() - 0.5f) * m_width;
+    float y = (Sampler::the().sampleUniformUnitInterval() - 0.5f) * m_height;
+
+    return {Vec2(x, y), m_width * m_height};
 }

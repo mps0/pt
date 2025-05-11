@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include <vector>
 
 #include "prim.h"
@@ -9,28 +8,33 @@
 class Scene
 {
 public:
-    void addPrim(std::unique_ptr<Prim> p)
+    void addPrim(Prim* p)
     {
-        m_prims.emplace_back(std::move(p));
+        m_prims.emplace_back(p);
     }
 
-    void addLight(std::unique_ptr<Light> l)
+    void addLight(Light* l)
     {
-        m_lights.emplace_back(std::move(l));
+        m_lights.emplace_back(l);
+        if(l->getFlags() & Light::INTERSECTABLE)
+        {
+            IntersectableLight* il = reinterpret_cast<IntersectableLight*>(l);
+            m_prims.emplace_back(il->getPrim());
+        }
     }
 
-    const std::vector<std::unique_ptr<Prim>>& getPrims() const
+    const std::vector<Prim*>& getPrims() const
     {
         return m_prims;
     }
 
-    const std::vector<std::unique_ptr<Light>>& getLights() const
+    const std::vector<Light*>& getLights() const
     {
         return m_lights;
     }
 
 private:
 
-    std::vector<std::unique_ptr<Prim>> m_prims;
-    std::vector<std::unique_ptr<Light>> m_lights;
+    std::vector<Prim*> m_prims;
+    std::vector<Light*> m_lights;
 };

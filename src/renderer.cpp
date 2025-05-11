@@ -76,37 +76,22 @@ void Renderer::renderPixel(const Tile& tile)
     for (uint32_t i = tile.i0; i < tile.i0 + tile.height; ++i) {
         for (uint32_t j = tile.j0; j < tile.j0 + tile.width; ++j) {
 
-            Vec3 res = Vec3(0.0f);
-            // TODO clean this up....
-            //for(uint32_t k = 0; k < m_samplesPerPixel; ++k)
-            {
-                float pixelsPerUnitLength = m_win.getHeight();
-                float xOffset = Sampler::the().sampleUniformUnitInterval();
-                float yOffset = Sampler::the().sampleUniformUnitInterval();
+            float pixelsPerUnitLength = m_win.getHeight();
+            float xOffset = 0.5f;
+            float yOffset = 0.5f;
 
-                float x = (float(j) + xOffset - 0.5f * m_win.getWidth()) / pixelsPerUnitLength;
-                float y = (float(i) + yOffset - 0.5f * m_win.getHeight()) / pixelsPerUnitLength;
-                y *= -1.f;
+            float x = (float(j) + xOffset - 0.5f * m_win.getWidth()) / pixelsPerUnitLength;
+            float y = (float(i) + yOffset - 0.5f * m_win.getHeight()) / pixelsPerUnitLength;
+            y *= -1.f;
 
-                Vec3 cam_pos = Vec3(0.f, 0.f, 0.f);
-                Vec3 pix_pos = Vec3(x, y, -1.f);
+            Vec3 cam_pos = Vec3(0.f, 0.f, 0.f);
+            Vec3 pix_pos = Vec3(x, y, -1.f);
 
-                Ray ray;
-                ray.o = Vec3(0.f, 0.f, 0.f);
-                ray.d = normalize(pix_pos - cam_pos);
-                res = res + m_integrator.Intersect(ray, m_scene);
-            }
+            Ray ray;
+            ray.o = Vec3(0.f, 0.f, 0.f);
+            ray.d = normalize(pix_pos - cam_pos);
 
-            m_accum[i * m_win.getWidth() + j] = m_accum[i * m_win.getWidth() + j] + res;
-
-            //res = (1.0f / m_samplesPerPixel) * res;
-
-            //Pixel temp = m_win.readPixel(i, j);
-            //res.x += temp.r;
-            //res.y += temp.g;
-            //res.z += temp.b;
-
-            //m_win.writePixel(i, j, Pixel(clampZeroToOne(res), 1.0f));
+            m_accum[i * m_win.getWidth() + j] = m_accum[i * m_win.getWidth() + j] + m_integrator.Intersect(ray, m_scene);
         }
     }
 }

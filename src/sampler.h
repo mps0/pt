@@ -9,7 +9,7 @@ template <typename T>
 struct RandomSample
 {
     T sample;
-    float InvPDF;
+    float invPDF;
 };
 
 
@@ -66,7 +66,7 @@ public:
         float theta = std::asin(r);
 
         // Project to hemisphere (Malley's method)
-        return {Vec3(r * std::cos(phi), r * std::sin(phi), std::sqrt(1.0f - r * r)), C_PI / std::cos(theta)};
+        return {Vec3(r * std::cos(phi), r * std::sin(phi), std::sqrt(1.0f - r * r)), C_PI / std::max(std::cos(theta), C_EPS)};
     }
 
     float sampleUniformUnitInterval()

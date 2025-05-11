@@ -10,7 +10,7 @@ public:
     Vec3 Intersect(Ray& ray, Scene& scene);
 
 private:
-    Vec3 traceRay(const Ray& ray, const Scene& scene, uint32_t depth);
+    Vec3 traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, uint32_t depth);
 
 
     uint32_t m_maxDepth;
