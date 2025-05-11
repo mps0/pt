@@ -25,13 +25,16 @@ int main()
     LambertianMaterial darkGrey({0.1f, 0.1f, 0.1f});
     LambertianMaterial lightBrown({0.78f, 0.64f, 0.52f});
 
-    LightMaterial whiteLightMat(Vec3(1.0f), 5.0f);
+    SpecularMaterial mirror({1.0f, 1.0f, 1.0f});
+    SpecularMaterial blueishMirror({0.5f, 0.5f, 1.0f});
+
+    LightMaterial whiteLightMat(Vec3(1.0f), 15.0f);
     LightMaterial yellowLightMat(Vec3(1.0f, 1.0f, 0.0f), 2.5f);
     LightMaterial purpleLightMat(Vec3(1.0f, 0.0f, 1.0f), 2.5f);
 
     Scene scene;
     //Spheres
-    Sphere sphere0 = Sphere(&red, Vec3(-1.0f, 0.0f, -5.0f), 0.5f);
+    Sphere sphere0 = Sphere(&blueishMirror, Vec3(-1.0f, 0.0f, -5.0f), 0.5f);
     Sphere sphere1 = Sphere(&green, Vec3(0.5f, -1.5f, -5.0f), 0.75f);
     //Walls
     //left wall

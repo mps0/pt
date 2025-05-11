@@ -34,3 +34,8 @@ Vec3 LightMaterial::evalLe()
 {
     return m_color * m_intensity;
 }
+
+Vec3 SpecularMaterial::evalBrdf(Vec3 wo, Vec3 wi, Vec3 p)
+{
+    return Vec3(0.0f);
+}

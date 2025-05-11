@@ -41,6 +41,15 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         Lo = depth == 0 ? Lo + Le : Lo + 0.5f * Le; // 0.5f factor to account for NEE
     }
 
+    // specular
+    if(rInter.mat->getFlags() & Material::SPECULAR)
+    {
+        Ray specRay;
+        specRay.o = rInter.hitPoint + rInter.normal * C_EPS;
+        specRay.d = ray.d - 2.0f * dot(ray.d, rInter.normal) * rInter.normal;
+        return rInter.mat->getAlbedo() * traceRay(specRay, scene, throughput, depth + 1);
+    }
+
     // NEE
     bool materialReflects = length(rInter.mat->getAlbedo()) > 0.0f ? true : false;
     if(materialReflects)

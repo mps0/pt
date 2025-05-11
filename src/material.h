@@ -8,22 +8,23 @@ class Material
 {
 public:
     enum : uint32_t
-    {
-        EMISSIVE = 1
-    };
+           {
+               EMISSIVE = 1,
+               SPECULAR = 1 << 1 
+           };
 
-    Material(std::string name, Vec3 albedo) : m_name(name), m_albedo(albedo), m_flags(0) {}
-    virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) = 0;
+           Material(std::string name, Vec3 albedo) : m_name(name), m_albedo(albedo), m_flags(0) {}
+           virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) = 0;
 
-    virtual Vec3 evalLe();
-    Vec3 getAlbedo();
-    uint32_t getFlags();
-    const std::string& getName();
+           virtual Vec3 evalLe();
+           Vec3 getAlbedo();
+           uint32_t getFlags();
+           const std::string& getName();
 
 protected:
-    std::string m_name;
-    uint32_t m_flags;
-    Vec3 m_albedo;
+           std::string m_name;
+           uint32_t m_flags;
+           Vec3 m_albedo;
 };
 
 class LambertianMaterial : public Material
@@ -51,4 +52,15 @@ public:
 private:
     Vec3 m_color;
     float m_intensity;
+};
+
+class SpecularMaterial : public Material
+{
+public:
+    SpecularMaterial(Vec3 albedo,std::string name = "SpecularMaterial") : Material(name, albedo) 
+    {
+        m_flags |= SPECULAR;
+    }
+
+    virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override;
 };
