@@ -2,4 +2,4 @@ A simple pathtracer.
 
 First render:
 
-<img src="migs/first.png" width="517">
+<img src="imgs/first.png" width="517">

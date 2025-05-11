@@ -90,14 +90,17 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
     outRay.d = normalize(sampWS);
 
     Vec3 brdf = rInter.mat->evalBrdf(outRay.d, ray.d, rInter.hitPoint);
-    throughput = throughput * brdf;
+
+    Vec3 temp = brdf * throughput * dot(rInter.normal, outRay.d) * samp.invPDF;
+    throughput = throughput * temp;
 
     float zeta = Sampler::the().sampleUniformUnitInterval();
+    float p = std::max(std::min(1.0f, length(throughput)), 0.1f);
 
-    if(zeta <= length(throughput))
+    if(zeta < p)
     {
         //bounce
-        return  Lo + brdf * traceRay(outRay, scene, throughput, depth + 1) * samp.invPDF * dot(rInter.normal, outRay.d);
+        Lo = Lo + (temp * traceRay(outRay, scene, throughput, depth + 1)) * (1.0f / p);
     }
 
     return Lo;
