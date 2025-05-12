@@ -11,6 +11,8 @@ void Renderer::render()
 
     uint32_t tileWidth = 10;
     uint32_t tileHeight = 10;
+    //uint32_t tileWidth = m_win.getWidth();
+    //uint32_t tileHeight = m_win.getHeight();
 
     uint32_t ii = 0;
     std::vector<Tile> tiles;

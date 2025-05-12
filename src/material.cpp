@@ -39,3 +39,8 @@ Vec3 SpecularMaterial::evalBrdf(Vec3 wo, Vec3 wi, Vec3 p)
 {
     return Vec3(0.0f);
 }
+
+Vec3 GlassMaterial::evalBrdf(Vec3 wo, Vec3 wi, Vec3 p)
+{
+    return Vec3(0.0f);
+}

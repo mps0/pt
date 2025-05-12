@@ -116,6 +116,18 @@ Vec<N> operator*(Vec<N> v, Vec<N> u)
 }
 
 template <uint8_t N>
+Vec<N> operator/(Vec<N> v, Vec<N> u)
+{
+    Vec<N> res;
+    for(uint8_t i = 0; i < N; ++i)
+    {
+        res[i] = v[i] / u[i];
+    }
+
+    return res;
+}
+
+template <uint8_t N>
 Vec<N> operator*(Vec<N> v, float t)
 {
     Vec<N> res;
@@ -128,12 +140,30 @@ Vec<N> operator*(Vec<N> v, float t)
 }
 
 template <uint8_t N>
+Vec<N> operator/(Vec<N> v, float t)
+{
+    return v * (1.0f / t);
+}
+
+template <uint8_t N>
 Vec<N> operator*(float t, Vec<N> v)
 {
     Vec<N> res;
     for(uint8_t i = 0; i < N; ++i)
     {
         res[i] = v[i] * t;
+    }
+
+    return res;
+}
+
+template <uint8_t N>
+Vec<N> operator-(Vec<N> v)
+{
+    Vec<N> res;
+    for(uint8_t i = 0; i < N; ++i)
+    {
+        res[i] = -v[i];
     }
 
     return res;
@@ -183,6 +213,32 @@ inline Vec<3> cross(Vec<3> u, Vec<3> v)
         u.z * v.x - u.x * v.z,
         u.x * v.y - u.y * v.x
     );
+}
+
+inline Vec<3> reflect(Vec<3> v, Vec<3> normal)
+{
+    return -v + 2.0f * dot(v, normal) * normal;
+}
+
+inline bool refract(Vec<3> v, Vec<3> normal, float eta_i, float eta_t, Vec<3>& tDir, float& cos_i, float& cos_t)
+{
+    float eta = eta_t / eta_i;
+
+    Vec<3> dir_i = v;
+    cos_i = dot(dir_i, normal);
+    float sin2_i = 1.f - cos_i * cos_i;
+    float sin2_t = sin2_i / (eta * eta);
+
+    if(sin2_t >= 1.0f)
+    {
+        return false;
+    }
+
+    cos_t = std::sqrtf(1.f - sin2_t);
+
+    tDir = -dir_i / eta + (cos_i / eta - cos_t) * normal;
+
+    return true;
 }
 
 template <uint8_t N>

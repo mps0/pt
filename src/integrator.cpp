@@ -2,8 +2,10 @@
 #include "defs.h"
 #include "material.h"
 #include "prim.h"
+#include "ray.h"
 #include "sampler.h"
 #include "vec.h"
+#include <cmath>
 
 Vec3 Integrator::Intersect(Ray& ray, Scene& scene)
 {
@@ -13,10 +15,11 @@ Vec3 Integrator::Intersect(Ray& ray, Scene& scene)
 Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, uint32_t depth)
 {
     Vec3 Lo = Vec3(0.0f);
-    //if(depth > 1)
-    //{
-    //    return Lo;
-    //}
+    //TODO
+    if(depth > 4)
+    {
+        return Lo;
+    }
 
     std::vector<Prim*> prims = scene.getPrims();
     Intersection rInter{false, FLT_MAX, Vec3(), Vec3(), nullptr};
@@ -41,20 +44,63 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         Lo = depth == 0 ? Lo + Le : Lo + 0.5f * Le; // 0.5f factor to account for NEE
     }
 
-    // specular
-    if(rInter.mat->getFlags() & Material::SPECULAR)
-    {
-        Ray specRay;
-        specRay.o = rInter.hitPoint + rInter.normal * C_EPS;
-        specRay.d = ray.d - 2.0f * dot(ray.d, rInter.normal) * rInter.normal;
-        return rInter.mat->getAlbedo() * traceRay(specRay, scene, throughput, depth + 1);
-    }
 
     // NEE
     bool materialReflects = length(rInter.mat->getAlbedo()) > 0.0f ? true : false;
     if(materialReflects)
     {
         Lo = Lo + computeDirectLigting(ray, scene, rInter);
+    }
+
+    // specular
+    if(rInter.mat->getFlags() & Material::SPECULAR)
+    {
+        Vec3 reflectedDir = reflect(-ray.d, rInter.normal);
+        Ray specRay(rInter.hitPoint + rInter.normal * C_EPS, reflectedDir);
+        return Lo + rInter.mat->getAlbedo() * traceRay(specRay, scene, throughput, depth + 1);
+    }
+
+    // glass 
+    if(rInter.mat->getFlags() & Material::GLASS)
+    {
+        float eta_i = 1.0f;
+        float eta_t = 1.5f;
+
+        Vec3 n = rInter.normal;
+        if(dot(-ray.d, rInter.normal) < 0.f)
+        {
+            n = -n;
+            std::swap(eta_i, eta_t);
+        }
+
+        float cos_i;
+        float cos_t;
+        Vec3 refractDir;
+        bool worked = refract(-ray.d, n, eta_i, eta_t, refractDir, cos_i, cos_t);
+
+        float fresnelParallel = (eta_t * cos_i - eta_i * cos_t)
+            / (eta_t * cos_i + eta_i * cos_t);
+
+        float fresnelPerp = (eta_i * cos_i - eta_t * cos_t)
+            / (eta_i * cos_i + eta_t * cos_t);
+
+        float fresnel = 0.5f * (fresnelParallel * fresnelParallel
+                + fresnelPerp * fresnelPerp);
+
+        Vec3 test(0.0f);
+        if(worked)
+        {
+            Ray glassRay(rInter.hitPoint - n * C_EPS, refractDir);
+            test = test + rInter.mat->getAlbedo() * (1.0f - fresnel) * traceRay(glassRay, scene, throughput, depth + 1);
+        }
+
+        Vec3 reflectedDir = reflect(-ray.d, n);
+        Ray reflectedRay(rInter.hitPoint + n * C_EPS, reflectedDir);
+        //std::cout << "REFLECTED RAY: ORIGIN: "; print(reflectedRay.o); std::cout << std::endl;
+        //std::cout << "REFLECTED RAY: DIRECTION: "; print(reflectedRay.d); std::cout << std::endl;
+        test = test + rInter.mat->getAlbedo() * fresnel * traceRay(reflectedRay, scene, throughput, depth + 1);
+
+        return Lo + test;
     }
 
     Ray outRay;
