@@ -214,7 +214,6 @@ Vec<N> normalize(Vec<N> v)
     return v * (1.0f / length(v));
 }
 
-
 inline Vec<3> cross(Vec<3> u, Vec<3> v)
 {
     return Vec<3>(
@@ -248,6 +247,30 @@ inline bool refract(Vec<3> v, Vec<3> normal, float eta_i, float eta_t, Vec<3>& t
     tDir = -dir_i / eta + (cos_i / eta - cos_t) * normal;
 
     return true;
+}
+
+template <uint8_t N>
+inline float max(Vec<N> v)
+{
+    float res = v[0];
+    for(uint8_t i = 1; i < N; ++i)
+    {
+        res = std::max(res, v[i]);
+    }
+
+    return res;
+}
+
+template <uint8_t N>
+inline float min(Vec<N> v)
+{
+    float res = v[0];
+    for(uint8_t i = 1; i < N; ++i)
+    {
+        res = std::min(res, v[i]);
+    }
+
+    return res;
 }
 
 template <uint8_t N>

@@ -37,6 +37,13 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         return Lo;
     }
 
+    // flip normal if necessary
+    Vec3 n = rInter.normal;
+    if(dot(-ray.d, rInter.normal) < 0.f)
+    {
+        n = -n;
+    }
+
     // emission
     if(rInter.mat->getFlags() & Material::EMISSIVE)
     {
@@ -52,60 +59,51 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         Lo += computeDirectLigting(ray, scene, rInter);
     }
 
-    // glass 
-    Vec3 transmittance = Vec3(0.0f);
-    Vec3 n = rInter.normal;
-    if(dot(-ray.d, rInter.normal) < 0.f)
-    {
-        n = -n;
-    }
-
-    float fresnel = 1.0f; 
-    if(rInter.mat->getFlags() & Material::REFRACTS)
-    {
-        float eta_i = 1.0f;
-        float eta_t = 1.5f;
-
-        if(dot(-ray.d, rInter.normal) < 0.f)
-        {
-            std::swap(eta_i, eta_t);
-        }
-
-        float cos_i;
-        float cos_t;
-        Vec3 refractDir;
-        bool worked = refract(-ray.d, n, eta_i, eta_t, refractDir, cos_i, cos_t);
-
-        float fresnelParallel = (eta_t * cos_i - eta_i * cos_t)
-            / (eta_t * cos_i + eta_i * cos_t);
-
-        float fresnelPerp = (eta_i * cos_i - eta_t * cos_t)
-            / (eta_i * cos_i + eta_t * cos_t);
-
-        fresnel = 0.5f * (fresnelParallel * fresnelParallel
-                + fresnelPerp * fresnelPerp);
-
-        if(worked)
-        {
-            Ray glassRay(rInter.hitPoint - n * C_EPS, refractDir);
-            transmittance += rInter.mat->getAlbedo() * (1.0f - fresnel) * traceRay(glassRay, scene, throughput, depth + 1);
-        }
-    } 
-
-    // specular
-    Vec3 reflected = Vec3(0.0f);
     if(rInter.mat->getFlags() & Material::SPECULAR)
     {
-        Vec3 reflectedDir = reflect(-ray.d, n);
-        Ray specRay(rInter.hitPoint + rInter.normal * C_EPS, reflectedDir);
-        reflected += rInter.mat->getAlbedo() * traceRay(specRay, scene, throughput, depth + 1);
-    }
+        float fresnel = 1.0f; 
+        Vec3 refractDir;
+        float cos_i;
+        float cos_t;
+        bool refracted = false;
+        if(rInter.mat->getFlags() & Material::REFRACTS)
+        {
+            float eta_i = 1.0f;
+            float eta_t = 1.5f;
 
-    if(length(reflected) > 0.f || length(transmittance) > 0.f)
-    {
-        return fresnel * reflected + (1.0f - fresnel) * transmittance;
-    }
+            if(dot(-ray.d, rInter.normal) < 0.f)
+            {
+                std::swap(eta_i, eta_t);
+            }
 
+            refracted = refract(-ray.d, n, eta_i, eta_t, refractDir, cos_i, cos_t);
+
+            if(refracted)
+            {
+                float fresnelParallel = (eta_t * cos_i - eta_i * cos_t)
+                    / (eta_t * cos_i + eta_i * cos_t);
+
+                float fresnelPerp = (eta_i * cos_i - eta_t * cos_t)
+                    / (eta_i * cos_i + eta_t * cos_t);
+
+                fresnel = 0.5f * (fresnelParallel * fresnelParallel
+                        + fresnelPerp * fresnelPerp);
+            }
+        }
+
+        // reflect or refect
+        if(!refracted || fresnel >= Sampler::the().sampleUniformUnitInterval())
+        {
+            Vec3 reflectedDir = reflect(-ray.d, n);
+            Ray specRay(rInter.hitPoint + rInter.normal * C_EPS, reflectedDir);
+            return rInter.mat->getAlbedo() * traceRay(specRay, scene, fresnel * throughput, depth + 1);
+        }
+        else
+        {
+            Ray glassRay(rInter.hitPoint - n * C_EPS, refractDir);
+            return rInter.mat->getAlbedo() * traceRay(glassRay, scene, (1.0f - fresnel) * throughput, depth + 1);
+        }
+    }
 
     Ray outRay;
     float outRayInvPdf;
@@ -117,7 +115,7 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
     throughput = throughput * temp;
 
     float zeta = Sampler::the().sampleUniformUnitInterval();
-    float p = std::max(std::min(1.0f, length(throughput)), 0.1f);
+    float p = max(throughput);
 
     if(zeta < p)
     {
