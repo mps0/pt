@@ -170,6 +170,15 @@ Vec<N> operator-(Vec<N> v)
 }
 
 template <uint8_t N>
+void operator+=(Vec<N>& lhs, Vec<N> rhs)
+{
+    for(uint8_t i = 0; i < N; ++i)
+    {
+        lhs[i] = lhs[i] + rhs[i];
+    }
+}
+
+template <uint8_t N>
 float dot(Vec<N> v, Vec<N> u)
 {
     float res = 0.f;

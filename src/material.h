@@ -11,7 +11,7 @@ public:
            {
                EMISSIVE = 1,
                SPECULAR = 1 << 1,
-               GLASS = 1 << 2 
+               REFRACTS = 1 << 2 
            };
 
            Material(std::string name, Vec3 albedo) : m_name(name), m_albedo(albedo), m_flags(0) {}
@@ -71,7 +71,8 @@ class GlassMaterial : public Material
 public:
     GlassMaterial(Vec3 albedo,std::string name = "GlassMaterial") : Material(name, albedo) 
     {
-        m_flags |= GLASS;
+        m_flags |= SPECULAR;
+        m_flags |= REFRACTS;
     }
 
     virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override;
