@@ -14,18 +14,20 @@ public:
                REFRACTS = 1 << 2 
            };
 
-           Material(std::string name, Vec3 albedo) : m_name(name), m_albedo(albedo), m_flags(0) {}
+           Material(std::string name, Vec3 albedo, float ior = 1.0f) : m_name(name), m_albedo(albedo), m_ior(ior), m_flags(0) {}
            virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) = 0;
 
            virtual Vec3 evalLe();
            Vec3 getAlbedo();
            uint32_t getFlags();
            const std::string& getName();
+           float getIor();
 
 protected:
            std::string m_name;
-           uint32_t m_flags;
            Vec3 m_albedo;
+           float m_ior;
+           uint32_t m_flags;
 };
 
 class LambertianMaterial : public Material
@@ -36,6 +38,7 @@ public:
 
 private:
     Vec3 m_color;
+    float m_eta;
 };
 
 class LightMaterial : public Material
@@ -69,7 +72,7 @@ public:
 class GlassMaterial : public Material
 {
 public:
-    GlassMaterial(Vec3 albedo,std::string name = "GlassMaterial") : Material(name, albedo) 
+    GlassMaterial(Vec3 albedo,std::string name = "GlassMaterial") : Material(name, albedo, 1.5f) 
     {
         m_flags |= SPECULAR;
         m_flags |= REFRACTS;

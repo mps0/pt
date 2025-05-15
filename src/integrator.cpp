@@ -1,5 +1,6 @@
 #include "integrator.h"
 #include "defs.h"
+#include "light.h"
 #include "material.h"
 #include "prim.h"
 #include "ray.h"
@@ -7,16 +8,15 @@
 #include "vec.h"
 #include <cmath>
 
-Vec3 Integrator::Intersect(Ray& ray, Scene& scene)
+Vec3 Integrator::intersect(Ray& ray, Scene& scene)
 {
     return traceRay(ray, scene, Vec3(1.f), 0);
 }
 
-Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, uint32_t depth)
+Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, uint32_t depth, float ior)
 {
     Vec3 Lo = Vec3(0.0f);
-    //TODO
-    if(depth > 4)
+    if(depth > m_maxDepth)
     {
         return Lo;
     }
@@ -37,20 +37,12 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         return Lo;
     }
 
-    // flip normal if necessary
-    Vec3 n = rInter.normal;
-    if(dot(-ray.d, rInter.normal) < 0.f)
-    {
-        n = -n;
-    }
-
     // emission
     if(rInter.mat->getFlags() & Material::EMISSIVE)
     {
         Vec3 Le = rInter.mat->evalLe();
-        Lo = depth == 0 ? Lo + Le : Lo + 0.5f * Le; // 0.5f factor to account for NEE
+        Lo = depth > 0 ? Lo + 0.5f * Le : Lo + Le;
     }
-
 
     // NEE
     bool materialReflects = length(rInter.mat->getAlbedo()) > 0.0f ? true : false;
@@ -66,15 +58,16 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         float cos_i;
         float cos_t;
         bool refracted = false;
+        Vec3 n = rInter.normal;
+        if(dot(-ray.d, rInter.normal) < 0.f)
+        {
+            n = -n;
+        }
+
         if(rInter.mat->getFlags() & Material::REFRACTS)
         {
-            float eta_i = 1.0f;
-            float eta_t = 1.5f;
-
-            if(dot(-ray.d, rInter.normal) < 0.f)
-            {
-                std::swap(eta_i, eta_t);
-            }
+            float eta_i = ior;
+            float eta_t = rInter.mat->getIor();
 
             refracted = refract(-ray.d, n, eta_i, eta_t, refractDir, cos_i, cos_t);
 
@@ -95,13 +88,13 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         if(!refracted || fresnel >= Sampler::the().sampleUniformUnitInterval())
         {
             Vec3 reflectedDir = reflect(-ray.d, n);
-            Ray specRay(rInter.hitPoint + rInter.normal * C_EPS, reflectedDir);
-            return rInter.mat->getAlbedo() * traceRay(specRay, scene, fresnel * throughput, depth + 1);
+            Ray specRay(rInter.hitPoint + n * C_EPS, reflectedDir);
+            return rInter.mat->getAlbedo() * traceRay(specRay, scene, fresnel * throughput, depth + 1, ior);
         }
         else
         {
             Ray glassRay(rInter.hitPoint - n * C_EPS, refractDir);
-            return rInter.mat->getAlbedo() * traceRay(glassRay, scene, (1.0f - fresnel) * throughput, depth + 1);
+            return rInter.mat->getAlbedo() * traceRay(glassRay, scene, (1.0f - fresnel) * throughput, depth + 1, rInter.mat->getIor());
         }
     }
 
@@ -115,24 +108,22 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
     throughput = throughput * temp;
 
     float zeta = Sampler::the().sampleUniformUnitInterval();
-    float p = max(throughput);
+    float p = std::max(std::min(1.0f, max(throughput)), 0.001f);
 
     if(zeta < p)
     {
         //bounce
-        Lo = Lo + (temp * traceRay(outRay, scene, throughput, depth + 1)) * (1.0f / p);
+        Lo = Lo + (temp * traceRay(outRay, scene, throughput, depth + 1, ior)) * (1.0f / p);
     }
     return Lo;
 }
 
-bool Integrator::queryVisibility(const Ray& ray, const Scene& scene, float tMax)
-{
-    std::vector<Prim*> prims = scene.getPrims();
-    for(Prim* p : scene.getPrims())
+bool Integrator::queryVisibility(const Ray& ray, const Scene& scene, float tMax) { std::vector<Prim*> prims = scene.getPrims();
+    for(Prim* p : prims)
     {
         Intersection lightInter = p->Intersect(ray);
 
-        if(lightInter.hit && (lightInter.t <= tMax))
+        if(lightInter.hit && ((lightInter.t + C_EPS) < tMax))
         {
             return false;
         }
@@ -140,29 +131,110 @@ bool Integrator::queryVisibility(const Ray& ray, const Scene& scene, float tMax)
     return true;
 }
 
+Intersection Integrator::intersectLights(const Ray& ray, const Scene& scene)
+{
+    std::vector<Light*> lights = scene.getLights();
+    Intersection rInter = Intersection::NoHit;
+    for(Light* l : lights)
+    {
+        Intersection inter = l->intersect(ray);
+        if(inter.hit && inter.t < rInter.t)
+        {
+            rInter = inter;
+        }
+    }
+
+    return rInter;
+}
+
 Vec3 Integrator::computeDirectLigting(const Ray& ray, const Scene& scene, const Intersection& inter)
 {
     std::vector<Light*> lights = scene.getLights();
 
-    Vec3 Li = Vec3(0.0f);
-    for(Light* l : lights)
+    std::vector<std::pair<Vec3, float>> LeSamps;
+
+    bool isSpecular = inter.mat->getFlags() & Material::SPECULAR;
+    if(!isSpecular)
     {
-
-        Vec3 adjHitPoint = inter.hitPoint + inter.normal * C_EPS;
-        Light::Sample lightSample = l->sample();
-        Vec3 lightVec = lightSample.wP - adjHitPoint;
-
-        Ray lightRay;
-        lightRay.o = adjHitPoint;
-        lightRay.d = normalize(lightVec);
-
-        if(queryVisibility(lightRay, scene, length(lightVec)))
+        for(Light* l : lights)
         {
-            // NEE
-            Li = Li + l->eval(lightSample, inter.hitPoint) * dot(inter.normal, lightRay.d) * lightSample.invPDF * inter.mat->evalBrdf(lightRay.d, ray.d, inter.hitPoint);
+            Vec3 adjHitPoint = inter.hitPoint + inter.normal * C_EPS;
+            Light::Sample lightSample = l->sample();
+            Vec3 lightVec = lightSample.wP - adjHitPoint;
+
+            Ray lightRay;
+            lightRay.o = adjHitPoint;
+            lightRay.d = normalize(lightVec);
+
+            float lightSamplePdf = 0.f;
+            // light sampling
+            if(queryVisibility(lightRay, scene, length(lightVec)))
+            {
+                // NEE
+                lightSamplePdf = 1.0f / lightSample.invPDF;
+                Vec3 Le = l->eval(lightSample, inter.hitPoint) * dot(inter.normal, lightRay.d) * lightSample.invPDF * inter.mat->evalBrdf(lightRay.d, ray.d, inter.hitPoint);
+
+                if(l->getFlags() & Light::INTERSECTABLE)
+                {
+                    Le = Le * 0.5f;
+                }
+
+                LeSamps.emplace_back(Le, lightSamplePdf);
+            }
+
         }
     }
-    return Li;
+    // brdf sampling
+    Ray outRay;
+    float brdfPdf = 0.0f;
+    Vec3 brdf(0.0f);
+    if(inter.mat->getFlags() & Material::SPECULAR)
+    {
+        outRay.o = inter.hitPoint + C_EPS * inter.normal;
+        Vec3 n = inter.normal;
+        if(dot(n, ray.d) > 0)
+        {
+            n = -n;
+        }
+        outRay.d = reflect(-ray.d, inter.normal);
+        brdfPdf = 1.0f;
+        brdf = inter.mat->evalBrdf(outRay.d, ray.d, outRay.o);
+    }
+    else
+    {
+        float outRayInvPdf;
+        makeHemisphereRay(inter.hitPoint, inter.normal, outRay, outRayInvPdf);
+
+        brdfPdf = 1.0f / outRayInvPdf;
+        brdf = inter.mat->evalBrdf(outRay.d, ray.d, outRay.o);
+    }
+
+    Intersection lightInter = intersectLights(outRay, scene);
+    if(lightInter.hit)
+    {
+        if(queryVisibility(outRay, scene, lightInter.t))
+        {
+            LeSamps.emplace_back(lightInter.mat->evalLe() * brdf * dot(inter.normal, outRay.d) / brdfPdf, brdfPdf);
+        }
+    }
+
+    float pdfAccum = 0.0f;
+    for(auto s : LeSamps)
+    {
+        pdfAccum += s.second;
+    }
+
+    Vec3 contrib(0.0f);
+    if (pdfAccum > 0.f)
+    {
+        for(auto s : LeSamps)
+        {
+            float weight = s.second / pdfAccum;
+            contrib += weight * s.first;
+        }
+    }
+
+    return contrib;
 }
 
 void Integrator::makeHemisphereRay(const Vec3& o, const Vec3& normal, Ray& outRay, float& invPdf)

@@ -24,6 +24,7 @@ add_executable( ${PROJECT_NAME}
     src/renderer.h
     src/sampler.h
     src/scene.h
+    src/utils.h
     src/vec.h
     src/window.cpp
     src/window.h

@@ -1,6 +1,5 @@
 #include <thread>
 
-#include "sampler.h"
 #include "renderer.h"
 #include "vec.h"
 
@@ -78,7 +77,7 @@ void Renderer::renderPixel(const Tile& tile)
     for (uint32_t i = tile.i0; i < tile.i0 + tile.height; ++i) {
         for (uint32_t j = tile.j0; j < tile.j0 + tile.width; ++j) {
 
-            float pixelsPerUnitLength = m_win.getHeight();
+            float pixelsPerUnitLength = 0.5f * m_win.getWidth() / std::tan(m_fov);
             float xOffset = 0.5f;
             float yOffset = 0.5f;
 
@@ -93,7 +92,7 @@ void Renderer::renderPixel(const Tile& tile)
             ray.o = Vec3(0.f, 0.f, 0.f);
             ray.d = normalize(pix_pos - cam_pos);
 
-            m_accum[i * m_win.getWidth() + j] = m_accum[i * m_win.getWidth() + j] + m_integrator.Intersect(ray, m_scene);
+            m_accum[i * m_win.getWidth() + j] = m_accum[i * m_win.getWidth() + j] + m_integrator.intersect(ray, m_scene);
         }
     }
 }

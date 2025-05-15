@@ -1,18 +1,19 @@
 #include "light.h"
 #include "material.h"
+#include "utils.h"
 #include "vec.h"
 #include "window.h"
 #include "renderer.h"
 #include "scene.h"
 #include "prim.h"
+#include "utils.h"
 
-//TODO FOV?
-
-constexpr float ASPECT_RATIO = 1.66f;
+constexpr float FOV = 20.f;
+constexpr float ASPECT_RATIO = 0.75f;
 constexpr float RES_Y = 400.f;
 constexpr float RES_X = RES_Y * ASPECT_RATIO;
 constexpr uint32_t SAMPLES_PER_PIXEL = 1000;
-constexpr uint32_t MAX_DEPTH = 5;
+constexpr uint32_t MAX_DEPTH = 10;
 
 int main()
 {
@@ -20,6 +21,7 @@ int main()
     LambertianMaterial green({0.f, 1.f, 0.f});
     LambertianMaterial blue({0.f, 0.f, 1.f});
 
+    LambertianMaterial black({0.0f, 0.0f, 0.0f});
     LambertianMaterial lightGrey({0.5f, 0.5f, 0.5f});
     LambertianMaterial grey({0.25f, 0.25f, 0.25f});
     LambertianMaterial darkGrey({0.1f, 0.1f, 0.1f});
@@ -31,28 +33,30 @@ int main()
     GlassMaterial glass({1.0f, 1.0f, 1.0f});
     GlassMaterial greenGlass({0.0f, 1.0f, 0.0f});
 
-    LightMaterial whiteLightMat(Vec3(1.0f), 30.0f);
+    LightMaterial degenLightMat(Vec3(0.0f), 0.0f);
+    LightMaterial whiteLightMat(Vec3(1.0f), 50.0f);
     LightMaterial yellowLightMat(Vec3(1.0f, 1.0f, 0.0f), 2.5f);
     LightMaterial purpleLightMat(Vec3(1.0f, 0.0f, 1.0f), 2.5f);
 
     Scene scene;
     //Spheres
     Sphere sphere0 = Sphere(&glass, Vec3(-1.0f, 0.0f, -5.0f), 0.5f);
-    Sphere sphere1 = Sphere(&greenGlass, Vec3(0.5f, -1.5f, -5.0f), 0.75f);
+    //Sphere sphere0 = Sphere(&glass, Vec3(0.0f, 0.0f, -5.0f), 0.5f);
+    Sphere sphere1 = Sphere(&glass, Vec3(0.0f, -0.75f, -5.0f), 0.75f);
     //Walls
     //left wall
-    Rectangle leftWall = Rectangle(&lightGrey, Vec3(-1.5f, 0.f, -5.0f), Vec3(0.f, 0.f, -1.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.0f);
+    Rectangle leftWall = Rectangle(&grey, Vec3(-1.5f, 0.f, -5.0f), Vec3(0.f, 0.f, -1.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.0f);
     //back wall
-    Rectangle backWall = Rectangle(&lightGrey, Vec3(0.0f, 0.f, -6.5f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.f);
+    Rectangle backWall = Rectangle(&grey, Vec3(0.0f, 0.f, -6.5f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.f);
     //right wall
-    Rectangle rightWall = Rectangle(&lightGrey, Vec3(1.5f, 0.f, -5.0f), Vec3(0.f, 0.f, 1.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.f);
+    Rectangle rightWall = Rectangle(&grey, Vec3(1.5f, 0.f, -5.0f), Vec3(0.f, 0.f, 1.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.f);
 
     //floor
-    Rectangle floor = Rectangle(&grey, Vec3(0.0f, -2.0f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, -1.f), 3.0f, 4.f);
+    Rectangle floor = Rectangle(&grey, Vec3(0.0f, -2.0f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, -1.f), 3.0f, 3.f);
     //ceiling
-    Rectangle ceiling = Rectangle(&lightBrown, Vec3(0.0f, 2.0f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, 1.f), 3.0f, 4.f);
+    Rectangle ceiling = Rectangle(&lightBrown, Vec3(0.0f, 2.0f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, 1.f), 3.0f, 3.f);
 
-    scene.addPrim(&sphere0);
+    //scene.addPrim(&sphere0);
     scene.addPrim(&sphere1);
     scene.addPrim(&leftWall);
     scene.addPrim(&backWall);
@@ -67,15 +71,15 @@ int main()
     PointLight pointLight1(&purpleLightMat, Vec3(1.0f, 1.99f, -6.0f));
     PointLight pointLight2(&whiteLightMat, Vec3(0.0f, 1.99f, -5.0f));
     scene.addLight(&rectLight);
-    scene.addLight(&pointLight0);
-    scene.addLight(&pointLight1);
+    //scene.addLight(&pointLight0);
+    //scene.addLight(&pointLight2);
     //scene.addLight(&pointLight2);
 
 
 
     Window win(RES_X, RES_Y);
     Integrator integrator(MAX_DEPTH);
-    Renderer renderer(win, scene, integrator, SAMPLES_PER_PIXEL);
+    Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL);
 
     renderer.render();
 

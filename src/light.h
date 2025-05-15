@@ -28,6 +28,10 @@ public:
 
     virtual Sample sample()  = 0;
     virtual Vec3 eval(Sample sample, Vec3 p) = 0;
+    virtual Intersection intersect(const Ray& ray)
+    {
+        return Intersection::NoHit;
+    }
 
     uint32_t getFlags() 
     {
@@ -78,6 +82,7 @@ public:
     Prim* getPrim() override;
     virtual Sample sample() override;
     virtual Vec3 eval(Sample sample, Vec3 p) override;
+    virtual Intersection intersect(const Ray& ray) override;
 
 private:
     Rectangle* m_rect;

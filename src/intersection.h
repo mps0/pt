@@ -14,5 +14,4 @@ struct Intersection
     Material* mat;
 };
 
-
 inline const Intersection Intersection::NoHit{false, FLT_MAX, Vec3(), Vec3(), nullptr};

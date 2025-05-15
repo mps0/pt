@@ -11,7 +11,7 @@ Vec3 PointLight::eval(Sample sample, Vec3 p)
 {
     Vec3 v = sample.wP - p;
 
-    return  m_mat->evalLe() * (1.0f / (1.0f +  dot(v, v))) * sample.invPDF;
+    return  m_mat->evalLe() * (1.0f / (1.0f +  dot(v, v)));
 }
 
 
@@ -34,8 +34,13 @@ Vec3 RectangleLight::eval(Sample sample, Vec3 p)
 
     if(cosL > 0.0f)
     {
-        return m_mat->evalLe() * (1.0f / (1.0f + dot(v, v))) * sample.invPDF;
+        return m_mat->evalLe() * (1.0f / (1.0f + dot(v, v)));
     }
 
     return Vec3(0.f);
+}
+
+Intersection RectangleLight::intersect(const Ray& ray)
+{
+    return m_rect->Intersect(ray);
 }

@@ -16,6 +16,11 @@ uint32_t Material::getFlags()
     return m_flags;
 }
 
+float Material::getIor()
+{
+    return m_ior;
+}
+
 const std::string& Material::getName(){ 
     return m_name; 
 };
