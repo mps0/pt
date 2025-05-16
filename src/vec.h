@@ -32,6 +32,7 @@ public:
     Vec<2>(float _x, float _y) : x(_x), y(_y) {}
 
     float& operator[](uint8_t i) { return data[i]; }
+    const float& operator[](uint8_t i) const { return data[i]; }
 };
 
 template <>
@@ -54,6 +55,7 @@ public:
     Vec<3>(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
 
     float& operator[](uint8_t i) { return data[i]; }
+    const float& operator[](uint8_t i) const { return data[i]; }
 };
 
 template <>
@@ -77,6 +79,7 @@ public:
     Vec<4>(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
 
     float& operator[](uint8_t i) { return data[i]; }
+    const float& operator[](uint8_t i) const { return data[i]; }
 };
 
     template <uint8_t N>

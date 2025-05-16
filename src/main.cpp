@@ -7,6 +7,7 @@
 #include "scene.h"
 #include "prim.h"
 #include "utils.h"
+#include "kdtree.h"
 
 constexpr float FOV = 20.f;
 constexpr float ASPECT_RATIO = 0.75f;
@@ -82,6 +83,18 @@ int main()
     Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL);
 
     renderer.render();
+    
+
+    std::vector<Vec2> test = {
+        {3, 6}, {17, 15}, {13, 15}, {6, 12}, {9, 1}, {2, 7}, {10, 19}
+    };
+
+
+
+
+    //KDTree<Vec2> kdTree(test);
+    //kdTree.printTree();
+    
 
     return 0;
 }

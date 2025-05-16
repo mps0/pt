@@ -5,12 +5,12 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_subdirectory(extern)
 
-
 add_executable( ${PROJECT_NAME}
     src/defs.h
     src/integrator.cpp
     src/integrator.h
     src/intersection.h
+    src/kdtree.h
     src/light.cpp
     src/light.h
     src/main.cpp
@@ -34,5 +34,5 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE minifb::minifb)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
-    -Wall -Wextra -Wpedantic
+    -Wall -Wextra -Wpedantic -Wfatal-errors
 )
