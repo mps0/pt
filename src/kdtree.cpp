@@ -77,7 +77,7 @@ const KDTree::Node& KDTree::getNode(size_t idx)
 
 size_t KDTree::createNode(size_t start, size_t last, size_t depth, uint8_t sortDim, std::vector<Photon>& photons)
 {
-    std::cout << "start: " << start << " last: " << last << std::endl;
+    //std::cout << "start: " << start << " last: " << last << std::endl;
     if(start > last)
     {
         return INVALID_INDEX;
@@ -100,20 +100,20 @@ size_t KDTree::createNode(size_t start, size_t last, size_t depth, uint8_t sortD
     n.left = INVALID_INDEX;
     n.right = INVALID_INDEX;
     ++m_offset;
-    std::cout << "dist: " << dist << std::endl;
-    std::cout << "m_offset: " << m_offset << std::endl;
-    std::cout << "medianIdx: " << medianIdx << std::endl;
+    //std::cout << "dist: " << dist << std::endl;
+    //std::cout << "m_offset: " << m_offset << std::endl;
+    //std::cout << "medianIdx: " << medianIdx << std::endl;
     if(dist > 0)
     {
         size_t medianIdx = start + dist / 2;
-        std::cout << "BEFORE start: " << start << " BEFORE last: " << last << std::endl;
+        //std::cout << "BEFORE start: " << start << " BEFORE last: " << last << std::endl;
         uint8_t dim = (sortDim + 1) % 3;
         if(medianIdx > 0)
         {
-            std::cout << "GOING LEFT" << std::endl;
+            //std::cout << "GOING LEFT" << std::endl;
             n.left = createNode(start, medianIdx - 1, depth + 1, dim, photons);
         }
-            std::cout << "GOING RIGHT" << std::endl;
+            //std::cout << "GOING RIGHT" << std::endl;
         n.right = createNode(medianIdx + 1, last, depth + 1, dim, photons);
     }
 

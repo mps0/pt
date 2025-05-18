@@ -12,4 +12,10 @@ struct Photon
 
     Photon() {}
     Photon(Vec3 _wPos)  : wPos(_wPos) {}
+
+    void print()
+    {
+        std::cout << "PHOTON flux: "; ::print(flux); std::cout << std::endl;
+        std::cout << "PHOTON wPos: "; ::print(wPos); std::cout << std::endl;
+    }
 };

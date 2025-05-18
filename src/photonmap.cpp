@@ -45,7 +45,8 @@ void PhotonMap::tracePhotons(const Scene& scene, const uint32_t numPhotons)
             photon.flux = mat->getFlux();
             photon.wPos = rInter.hitPoint;
 
-            std::cout << "PUSHING BACK PHOTON" << std::endl;
+            //std::cout << "HITPOINT: "; ::print(rInter.hitPoint); std::cout << std::endl;
+            //std::cout << "PUSHING BACK PHOTON" << std::endl;
             m_photons.push_back(photon);
         }
     }

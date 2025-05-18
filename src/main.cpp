@@ -35,7 +35,7 @@ int main()
     GlassMaterial greenGlass({0.0f, 1.0f, 0.0f});
 
     LightMaterial degenLightMat(Vec3(0.0f), 0.0f);
-    LightMaterial whiteLightMat(Vec3(1.0f), 50.0f);
+    LightMaterial whiteLightMat(Vec3(1.0f), 10.0f);
     LightMaterial yellowLightMat(Vec3(1.0f, 1.0f, 0.0f), 2.5f);
     LightMaterial purpleLightMat(Vec3(1.0f, 0.0f, 1.0f), 2.5f);
 
@@ -76,7 +76,7 @@ int main()
     scene.addLight(&pointLight2);
 
     PhotonMap photonmap;
-    photonmap.tracePhotons(scene, 100);
+    photonmap.tracePhotons(scene, 1000000);
 
     Window win(RES_X, RES_Y);
     Integrator integrator(MAX_DEPTH);
