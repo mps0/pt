@@ -11,7 +11,7 @@
 
 constexpr float FOV = 20.f;
 constexpr float ASPECT_RATIO = 0.75f;
-constexpr float RES_Y = 400.f;
+constexpr float RES_Y = 600.f;
 constexpr float RES_X = RES_Y * ASPECT_RATIO;
 constexpr uint32_t SAMPLES_PER_PIXEL = 1;
 constexpr uint32_t MAX_DEPTH = 10;
@@ -35,7 +35,7 @@ int main()
     GlassMaterial greenGlass({0.0f, 1.0f, 0.0f});
 
     LightMaterial degenLightMat(Vec3(0.0f), 0.0f);
-    LightMaterial whiteLightMat(Vec3(1.0f), 0.01f);
+    LightMaterial whiteLightMat(Vec3(1.0f), 0.005f);
     LightMaterial yellowLightMat(Vec3(1.0f, 1.0f, 0.0f), 2.5f);
     LightMaterial purpleLightMat(Vec3(1.0f, 0.0f, 1.0f), 2.5f);
 

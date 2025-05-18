@@ -1,7 +1,7 @@
 #include "material.h"
 
 
-Vec3 Material::evalLe()
+Vec3 Material::evalLe() const
 {
     return Vec3(0.f);
 }
