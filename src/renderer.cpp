@@ -43,8 +43,6 @@ void Renderer::render()
             threads.emplace_back(&Renderer::worker, this);
         }
 
-        m_done = false;
-
         for (auto& t : threads) 
         {
             t.join();
@@ -92,7 +90,7 @@ void Renderer::renderPixel(const Tile& tile)
             ray.o = Vec3(0.f, 0.f, 0.f);
             ray.d = normalize(pix_pos - cam_pos);
 
-            m_accum[i * m_win.getWidth() + j] = m_accum[i * m_win.getWidth() + j] + m_integrator.intersect(ray, m_scene);
+            m_accum[i * m_win.getWidth() + j] = m_accum[i * m_win.getWidth() + j] + m_integrator.intersect(ray, m_scene, m_photonmap);
         }
     }
 }
@@ -105,7 +103,6 @@ void Renderer::worker()
             std::lock_guard<std::mutex> lock(m_queueMutex);
             if (m_tileQueue.empty())
             {
-                m_done = true;
                 return;
             }
             

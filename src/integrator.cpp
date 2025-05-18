@@ -1,19 +1,19 @@
+#include <cmath>
+
 #include "integrator.h"
 #include "defs.h"
-#include "light.h"
 #include "material.h"
 #include "prim.h"
 #include "ray.h"
 #include "sampler.h"
 #include "vec.h"
-#include <cmath>
 
-Vec3 Integrator::intersect(Ray& ray, Scene& scene)
+Vec3 Integrator::intersect(Ray& ray, Scene& scene, PhotonMap& photonMap)
 {
-    return traceRay(ray, scene, Vec3(1.f), 0);
+    return traceRay(ray, scene, Vec3(1.f), 0, photonMap);
 }
 
-Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, uint32_t depth, float ior)
+Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, uint32_t depth, PhotonMap& photonMap, float ior)
 {
     Vec3 Lo = Vec3(0.0f);
     if(depth > m_maxDepth)
@@ -37,64 +37,101 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         return Lo;
     }
 
-    // emission
-    if(rInter.mat->getFlags() & Material::EMISSIVE)
+    // photon map enabled
+
+    //TODO
+    bool usePhotonMap = true;
+    if(usePhotonMap)
     {
-        Vec3 Le = rInter.mat->evalLe();
-        Lo = depth > 0 ? Lo + 0.5f * Le : Lo + Le;
-    }
-
-    // NEE
-    bool materialReflects = length(rInter.mat->getAlbedo()) > 0.0f ? true : false;
-    if(materialReflects)
-    {
-        Lo += computeDirectLigting(ray, scene, rInter);
-    }
-
-    if(rInter.mat->getFlags() & Material::SPECULAR)
-    {
-        float fresnel = 1.0f; 
-        Vec3 refractDir;
-        float cos_i;
-        float cos_t;
-        bool refracted = false;
-        Vec3 n = rInter.normal;
-        if(dot(-ray.d, rInter.normal) < 0.f)
+        // emission
+        if(rInter.mat->getFlags() & Material::EMISSIVE && depth == 0)
         {
-            n = -n;
-        }
-
-        if(rInter.mat->getFlags() & Material::REFRACTS)
-        {
-            float eta_i = ior;
-            float eta_t = rInter.mat->getIor();
-
-            refracted = refract(-ray.d, n, eta_i, eta_t, refractDir, cos_i, cos_t);
-
-            if(refracted)
-            {
-                float fresnelParallel = (eta_t * cos_i - eta_i * cos_t)
-                    / (eta_t * cos_i + eta_i * cos_t);
-
-                float fresnelPerp = (eta_i * cos_i - eta_t * cos_t)
-                    / (eta_i * cos_i + eta_t * cos_t);
-
-                fresnel = 0.5f * (fresnelParallel * fresnelParallel
-                        + fresnelPerp * fresnelPerp);
-            }
-        }
-
-        // reflect or refect
-        if(!refracted || fresnel >= Sampler::the().sampleUniformUnitInterval())
-        {
-            Vec3 reflectedDir = reflect(-ray.d, n);
-            Ray specRay(rInter.hitPoint + n * C_EPS, reflectedDir);
-            return rInter.mat->getAlbedo() * traceRay(specRay, scene, fresnel * throughput, depth + 1, ior);
+            Lo = rInter.mat->evalLe();
         }
         else
         {
-            Ray glassRay(rInter.hitPoint - n * C_EPS, refractDir);
-            return rInter.mat->getAlbedo() * traceRay(glassRay, scene, (1.0f - fresnel) * throughput, depth + 1, rInter.mat->getIor());
+            // evaluate photons
+            std::vector<Photon> photons = photonMap.getInterPhotons(10, rInter);
+
+            Vec3 photonAccum;
+            for(Photon& p : photons)
+            {
+                photonAccum += p.flux;
+            }
+
+            Vec3 flux = photonAccum / photons.size();
+            Vec3 furthestP = photons.back().wPos;
+            Vec3 xp = furthestP - rInter.hitPoint;
+            float radiusSquared = dot(xp, xp);
+            float area = C_PI * radiusSquared;
+
+            Vec3 irradiance = flux / area;
+
+            Vec3 radiance = irradiance / C_2PI;
+
+            Lo = radiance;
+        }
+    }
+    else
+    {
+        // emission
+        if(rInter.mat->getFlags() & Material::EMISSIVE)
+        {
+            Vec3 Le = rInter.mat->evalLe();
+            Lo = depth > 0 ? Lo + 0.5f * Le : Lo + Le;
+        }
+
+        // NEE
+        bool materialReflects = length(rInter.mat->getAlbedo()) > 0.0f ? true : false;
+        if(materialReflects)
+        {
+            Lo += computeDirectLigting(ray, scene, rInter);
+        }
+        if(rInter.mat->getFlags() & Material::SPECULAR)
+        {
+            float fresnel = 1.0f; 
+            Vec3 refractDir;
+            float cos_i;
+            float cos_t;
+            bool refracted = false;
+            Vec3 n = rInter.normal;
+            if(dot(-ray.d, rInter.normal) < 0.f)
+            {
+                n = -n;
+            }
+
+            if(rInter.mat->getFlags() & Material::REFRACTS)
+            {
+                float eta_i = ior;
+                float eta_t = rInter.mat->getIor();
+
+                refracted = refract(-ray.d, n, eta_i, eta_t, refractDir, cos_i, cos_t);
+
+                if(refracted)
+                {
+                    float fresnelParallel = (eta_t * cos_i - eta_i * cos_t)
+                        / (eta_t * cos_i + eta_i * cos_t);
+
+                    float fresnelPerp = (eta_i * cos_i - eta_t * cos_t)
+                        / (eta_i * cos_i + eta_t * cos_t);
+
+                    fresnel = 0.5f * (fresnelParallel * fresnelParallel
+                            + fresnelPerp * fresnelPerp);
+                }
+            }
+
+            // reflect or refect
+            if(!refracted || fresnel >= Sampler::the().sampleUniformUnitInterval())
+            {
+                Vec3 reflectedDir = reflect(-ray.d, n);
+                Ray specRay(rInter.hitPoint + n * C_EPS, reflectedDir);
+                return rInter.mat->getAlbedo() * traceRay(specRay, scene, fresnel * throughput, depth + 1, photonMap, ior);
+            }
+            else
+            {
+                Ray glassRay(rInter.hitPoint - n * C_EPS, refractDir);
+                return rInter.mat->getAlbedo() * traceRay(glassRay, scene, (1.0f - fresnel) * throughput, depth + 1, photonMap, rInter.mat->getIor());
+            }
         }
     }
 
@@ -113,12 +150,13 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
     if(zeta < p)
     {
         //bounce
-        Lo = Lo + (temp * traceRay(outRay, scene, throughput, depth + 1, ior)) * (1.0f / p);
+        Lo = Lo + (temp * traceRay(outRay, scene, throughput, depth + 1, photonMap, ior)) * (1.0f / p);
     }
     return Lo;
 }
 
-bool Integrator::queryVisibility(const Ray& ray, const Scene& scene, float tMax) { std::vector<Prim*> prims = scene.getPrims();
+bool Integrator::queryVisibility(const Ray& ray, const Scene& scene, float tMax) {
+    std::vector<Prim*> prims = scene.getPrims();
     for(Prim* p : prims)
     {
         Intersection lightInter = p->Intersect(ray);

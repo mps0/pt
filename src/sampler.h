@@ -54,6 +54,18 @@ public:
         return {Vec3(r * std::cos(phi), r * std::sin(phi), z),  C_2PI};
     }
 
+    RandomSample<Vec3> sampleUniformSphere()
+    {
+        float r0 = m_distrib(m_generator);
+        float r1 = m_distrib(m_generator);
+
+        float z = 1.0f - 2.0f * r0;
+        float r = std::sqrt(1.f - z * z);
+        float phi = 2.0f * C_PI * r1;
+
+        return {Vec3(r * std::cos(phi), r * std::sin(phi), z),  C_4PI};
+    }
+
     RandomSample<Vec3> sampleCosineHemisphere()
     {
         // Sample disc

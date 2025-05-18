@@ -53,6 +53,8 @@ public:
 
     virtual Vec3 evalLe() override;
 
+    Vec3 getFlux() const;
+
 private:
     Vec3 m_color;
     float m_intensity;

@@ -10,12 +10,18 @@ add_executable( ${PROJECT_NAME}
     src/integrator.cpp
     src/integrator.h
     src/intersection.h
+    src/kdtree.cpp
     src/kdtree.h
     src/light.cpp
     src/light.h
     src/main.cpp
     src/material.cpp
     src/material.h
+    src/maxheap.cpp
+    src/maxheap.h
+    src/photon.h
+    src/photonmap.cpp
+    src/photonmap.h
     src/pixel.h
     src/prim.cpp
     src/prim.h

@@ -38,8 +38,13 @@ public:
         return m_flags;
     }
 
+    const LightMaterial* getMat()
+    {
+        return m_mat;
+    }
+
 protected:
-    Material* m_mat;
+    LightMaterial* m_mat;
     uint32_t m_flags;
 };
 
