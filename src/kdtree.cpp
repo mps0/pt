@@ -66,6 +66,10 @@ void KDTree::search(const Vec3& x, MaxHeap& heap, size_t  rootIdx, uint8_t dim)
     }
 
     float distToPhotonSquared = dot(pToX, pToX);
+    //std::cout << "rootIdx: " << rootIdx << std::endl;
+    //std::cout << "x: "; ::print(x); std::cout << std::endl;
+    //std::cout << "p.wPos: "; ::print(p.wPos); std::cout << std::endl;
+    //std::cout << "distToPhotonSquared: " << distToPhotonSquared << std::endl;
     heap.insert({rootIdx, distToPhotonSquared});
 }
 

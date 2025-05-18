@@ -44,6 +44,7 @@ void PhotonMap::tracePhotons(const Scene& scene, const uint32_t numPhotons)
             Photon photon;
             photon.flux = mat->getFlux();
             photon.wPos = rInter.hitPoint;
+            photon.wDir = ray.d;
 
             //std::cout << "HITPOINT: "; ::print(rInter.hitPoint); std::cout << std::endl;
             //std::cout << "PUSHING BACK PHOTON" << std::endl;
@@ -64,8 +65,15 @@ std::vector<Photon> PhotonMap::getInterPhotons(uint32_t N, const Intersection& i
     const std::vector<IdxDist>& hh = heap.getHeap();
     for(auto e : hh)
     {
-        photons.push_back(m_photons[e.first]);
+        photons.push_back(m_kdtree.getNode(e.first).photon);
     }
+
+    //std::cout << "HEAP FINAL" << std::endl;
+    //heap.print();
+
+    //std::cout << "PHOTONS[0} FINAL" << std::endl;
+    //std::cout << "photons[0] pos: "; ::print(photons[0].wPos); std::cout << std::endl;
+    //std::cout << "m_tree[idx].pos: "; ::print(m_photons[hh[0].first].wPos); std::cout << std::endl;
 
     return photons;
 }

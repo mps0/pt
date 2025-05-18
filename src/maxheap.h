@@ -14,6 +14,7 @@ public:
     bool insert(IdxDist e);
     float getMaxDist() const;
     const std::vector<IdxDist>& getHeap();
+    void print();
 
 private:
 

@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cfloat>
+#include <iostream>
 
 #include "maxheap.h"
 
@@ -22,8 +23,12 @@ bool MaxHeap::insert(IdxDist e)
     {
         if(iter != m_heap.end())
         {
+            //std::cout << "SPECIAL INSERT" << std::endl;
+            //print();
             m_heap.insert(iter, e);
             m_heap.pop_back();
+            //std::cout << "AFATER " << std::endl;
+            //print();
             return true;
         }
     }
@@ -44,4 +49,14 @@ float MaxHeap::getMaxDist() const
 const std::vector<IdxDist>& MaxHeap::getHeap()
 {
     return m_heap;
+}
+
+void MaxHeap::print()
+{
+    std::cout << "HEAP: " << std::endl;
+    for(auto e : m_heap)
+    {
+        std::cout << "(" << e.first << ", " << e.second << ")" << std::endl;
+
+    }
 }

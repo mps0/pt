@@ -51,32 +51,49 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         else
         {
             // evaluate photons
-            std::vector<Photon> photons = photonMap.getInterPhotons(50, rInter);
+            std::vector<Photon> photons = photonMap.getInterPhotons(100, rInter);
 
             Vec3 photonAccum;
+            uint32_t num = 0;
             for(Photon& p : photons)
             {
                 //p.print();
+                //float cos = dot(rInter.normal, -p.wDir);
+                //if(cos > 0.0f)
+                //{
+                //    photonAccum += p.flux * cos;
+                //    ++num;
+                //}
                 photonAccum += p.flux;
+                ++num;
             }
 
-            Vec3 flux = photonAccum / photons.size();
+            if(num > 0)
+            {
+                Vec3 flux = photonAccum;
 
-            //std::cout << "USING THIS NUM PHOTTONS IN RAIDUS: " << photons.size() << std::endl;
-            //std::cout << "flux: "; print(flux); std::cout << std::endl;
-            Vec3 furthestP = photons.back().wPos;
-            Vec3 xp = furthestP - rInter.hitPoint;
-            float radiusSquared = dot(xp, xp);
-            float area = C_PI * radiusSquared;
-//            std::cout << "furthestP: "; ::print(furthestP); std::cout << std::endl;
-//            std::cout << "hitPoint: "; ::print(rInter.hitPoint); std::cout << std::endl;
-//            std::cout << "radiusSquared: " << radiusSquared << std::endl;
-//
-            Vec3 irradiance = flux / area;
-            //std::cout << "irradiance: "; ::print(irradiance); std::cout << std::endl;
+                //std::cout << "USING THIS NUM PHOTTONS IN RAIDUS: " << photons.size() << std::endl;
+                //std::cout << "flux: "; print(flux); std::cout << std::endl;
+                Vec3 furthestP = photons.back().wPos;
+                Vec3 xp = furthestP - rInter.hitPoint;
+                float radiusSquared = dot(xp, xp);
+                float area = C_PI * radiusSquared;
+                //std::cout << "phontons SIZE: " << photons.size() << std::endl;
+                //std::cout << "photons[0] pos: "; ::print(photons[0].wPos); std::cout << std::endl;
+                //std::cout << "xp: "; ::print(xp); std::cout << std::endl;
+                //std::cout << "furthestP: "; ::print(furthestP); std::cout << std::endl;
+                //std::cout << "hitPoint: "; ::print(rInter.hitPoint); std::cout << std::endl;
+                //std::cout << "radiusSquared: " << radiusSquared << std::endl;
+                //
+                Vec3 irradiance = flux / area;
+                //Vec3 irradiance = flux;
+                //Vec3 irradiance = Vec3(10.f);
+                //std::cout << "irradiance: "; ::print(irradiance); std::cout << std::endl;
 
-            Vec3 radiance = irradiance * rInter.mat->getAlbedo() * C_INV_PI; //TODO
-                                                                                                Lo = radiance;
+                Vec3 radiance = irradiance * rInter.mat->getAlbedo() * C_INV_PI; //TODO
+                Lo = radiance;
+                //std::cout << "radiance "; ::print(radiance); std::cout << std::endl;
+            }
         }
     }
     else
