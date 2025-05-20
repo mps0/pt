@@ -1,4 +1,5 @@
 #include "light.h"
+#include "defs.h"
 #include "sampler.h"
 
 
@@ -7,13 +8,19 @@ Light::Sample PointLight::sample()
     return {Vec2(0.f), 1.0f, m_pos};
 }
 
-Vec3 PointLight::eval(Sample sample, Vec3 p)
+Vec3 PointLight::evalLe(Sample sample, Vec3 p)
 {
     Vec3 v = sample.wP - p;
 
-    return  m_mat->evalLe() * (1.0f / (1.0f +  dot(v, v)));
+    //return  (m_mat->getRadiantExitance() *  C_INV_4PI) / (1.0f + dot(v,v)) * sample.invPDF;
+    return  (m_mat->getRadiantExitance() *  C_INV_4PI) / (dot(v,v)) * sample.invPDF;
 }
 
+Vec3 PointLight::getTotalPower()
+{
+    // hacky ofc, since point lights have no area
+    return m_mat->getRadiantExitance();
+}
 
 Prim* RectangleLight::getPrim()
 {
@@ -27,14 +34,15 @@ Light::Sample RectangleLight::sample()
     return {surfaceSample.sample, surfaceSample.invPDF, wP};
 }
 
-Vec3 RectangleLight::eval(Sample sample, Vec3 p)
+Vec3 RectangleLight::evalLe(Sample sample, Vec3 p)
 {
     Vec3 v = sample.wP - p;
     float cosL = -dot(m_rect->m_normal, normalize(v));
 
     if(cosL > 0.0f)
     {
-        return m_mat->evalLe() * (1.0f / (1.0f + dot(v, v)));
+        // Assumes a cosine-weighted emittance
+        return m_mat->getRadiantExitance() * C_INV_2PI * cosL * sample.invPDF;
     }
 
     return Vec3(0.f);
@@ -43,4 +51,9 @@ Vec3 RectangleLight::eval(Sample sample, Vec3 p)
 Intersection RectangleLight::intersect(const Ray& ray)
 {
     return m_rect->Intersect(ray);
+}
+
+Vec3 RectangleLight::getTotalPower()
+{
+    return m_mat->getRadiantExitance() * m_rect->getArea();
 }

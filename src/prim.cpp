@@ -30,6 +30,11 @@ Intersection Sphere::Intersect(const Ray& ray)
     return {true, t, hitPoint, normal, m_mat};
 }
 
+float Sphere::getArea() const
+{
+    return C_4PI * m_radius * m_radius;
+}
+
 Intersection Rectangle::Intersect(const Ray& ray)
 {
     float denom = dot(ray.d, m_normal);
@@ -65,4 +70,8 @@ RandomSample<Vec2> Rectangle::sampleSurface()
     float y = (Sampler::the().sampleUniformUnitInterval() - 0.5f) * m_height;
 
     return {Vec2(x, y), m_width * m_height};
+}
+float Rectangle::getArea() const
+{
+    return m_height * m_width;
 }

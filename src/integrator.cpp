@@ -8,12 +8,12 @@
 #include "sampler.h"
 #include "vec.h"
 
-Vec3 Integrator::intersect(Ray& ray, Scene& scene, PhotonMap& photonMap)
+Vec3 Integrator::intersect(Ray& ray, Scene& scene, PhotonMap& photonMap, bool usePhotonMap)
 {
-    return traceRay(ray, scene, Vec3(1.f), 0, photonMap);
+    return traceRay(ray, scene, Vec3(1.f), 0, photonMap, usePhotonMap);
 }
 
-Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, uint32_t depth, PhotonMap& photonMap, float ior)
+Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, uint32_t depth, PhotonMap& photonMap, bool usePhotonMap, float ior)
 {
     Vec3 Lo = Vec3(0.0f);
     if(depth > 0)
@@ -37,16 +37,13 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         return Lo;
     }
 
-    // photon map enabled
-
-    //TODO
-    bool usePhotonMap = true;
     if(usePhotonMap)
     {
         // emission
         if(rInter.mat->getFlags() & Material::EMISSIVE && depth == 0)
         {
-            Lo = rInter.mat->evalLe();
+            //TODO
+            //Lo = rInter.mat->getPower();
         }
         else
         {
@@ -81,8 +78,13 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         // emission
         if(rInter.mat->getFlags() & Material::EMISSIVE)
         {
-            Vec3 Le = rInter.mat->evalLe();
-            Lo = depth > 0 ? Lo + 0.5f * Le : Lo + Le;
+            float cosL = dot(rInter.normal, -ray.d);
+
+            if(cosL > 0.0f)
+            {
+                Vec3 Le = rInter.mat->getRadiantExitance() * C_INV_2PI * cosL;
+                Lo = depth > 0 ? Lo + 0.5f * Le : Lo + Le;
+            }
         }
 
         // NEE
@@ -214,7 +216,7 @@ Vec3 Integrator::computeDirectLigting(const Ray& ray, const Scene& scene, const 
             {
                 // NEE
                 lightSamplePdf = 1.0f / lightSample.invPDF;
-                Vec3 Le = l->eval(lightSample, inter.hitPoint) * dot(inter.normal, lightRay.d) * lightSample.invPDF * inter.mat->evalBrdf(lightRay.d, ray.d, inter.hitPoint);
+                Vec3 Le = l->evalLe(lightSample, inter.hitPoint) * dot(inter.normal, lightRay.d) * lightSample.invPDF * inter.mat->evalBrdf(lightRay.d, ray.d, inter.hitPoint);
 
                 if(l->getFlags() & Light::INTERSECTABLE)
                 {
@@ -256,7 +258,8 @@ Vec3 Integrator::computeDirectLigting(const Ray& ray, const Scene& scene, const 
     {
         if(queryVisibility(outRay, scene, lightInter.t))
         {
-            LeSamps.emplace_back(lightInter.mat->evalLe() * brdf * dot(inter.normal, outRay.d) / brdfPdf, brdfPdf);
+            //TODO
+            //LeSamps.emplace_back(lightInter.mat->evalLe() * brdf * dot(inter.normal, outRay.d) / brdfPdf, brdfPdf);
         }
     }
 

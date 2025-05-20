@@ -1,10 +1,5 @@
 #include "material.h"
-
-
-Vec3 Material::evalLe() const
-{
-    return Vec3(0.f);
-}
+#include "defs.h"
 
 Vec3 Material::getAlbedo()
 {
@@ -35,15 +30,9 @@ Vec3 LightMaterial::evalBrdf(Vec3 wo, Vec3 wi, Vec3 p)
     return 0.0f;
 }
 
-Vec3 LightMaterial::evalLe() const
+Vec3 LightMaterial::getRadiantExitance() const
 {
-    return m_color * m_intensity;
-}
-
-//TODO wrong
-Vec3 LightMaterial::getFlux() const
-{
-    return m_color * m_intensity;
+    return m_color * m_intensity; // [W / m2]
 }
 
 Vec3 SpecularMaterial::evalBrdf(Vec3 wo, Vec3 wi, Vec3 p)

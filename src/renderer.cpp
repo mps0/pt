@@ -90,7 +90,7 @@ void Renderer::renderPixel(const Tile& tile)
             ray.o = Vec3(0.f, 0.f, 0.f);
             ray.d = normalize(pix_pos - cam_pos);
 
-            m_accum[i * m_win.getWidth() + j] = m_accum[i * m_win.getWidth() + j] + m_integrator.intersect(ray, m_scene, m_photonmap);
+            m_accum[i * m_win.getWidth() + j] = m_accum[i * m_win.getWidth() + j] + m_integrator.intersect(ray, m_scene, m_photonmap, m_usePhotonMap);
         }
     }
 }

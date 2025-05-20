@@ -7,9 +7,9 @@ void PhotonMap::tracePhotons(const Scene& scene, const uint32_t numPhotons)
     std::vector<Light*> lights = scene.getLights();
     std::vector<Prim*> prims = scene.getPrims();
 
-    for(uint32_t i = 0; i < numPhotons; ++i)
+    for(Light* l : lights)
     {
-        for(Light* l : lights)
+        for(uint32_t i = 0; i < numPhotons; ++i)
         {
             // just a single point light for now...
 
@@ -17,7 +17,8 @@ void PhotonMap::tracePhotons(const Scene& scene, const uint32_t numPhotons)
             Light::Sample lightSample = l->sample();
 
             // sample outgoing direction
-            RandomSample<Vec3> sample = Sampler::the().sampleUniformSphere();
+            //RandomSample<Vec3> sample = Sampler::the().sampleUniformSphere();
+            RandomSample<Vec3> sample = Sampler::the().sampleCosineHemisphere();
 
             Ray ray;
             ray.d = sample.sample;
@@ -40,9 +41,8 @@ void PhotonMap::tracePhotons(const Scene& scene, const uint32_t numPhotons)
             }
 
             // store photon in map
-            const LightMaterial* mat = l->getMat();
             Photon photon;
-            photon.flux = mat->getFlux();
+            photon.flux = l->getTotalPower() / numPhotons;
             photon.wPos = rInter.hitPoint;
             photon.wDir = ray.d;
 

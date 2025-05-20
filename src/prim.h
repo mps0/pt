@@ -13,8 +13,8 @@ class Prim
 public:
     Prim(Material* mat, std::string name) : m_mat(mat), m_name(name) {}
     virtual Intersection Intersect(const Ray& ray) = 0;
-    //TODO
     virtual RandomSample<Vec2> sampleSurface() {}
+    virtual float getArea() const = 0;
 
     const std::string& getName(){ return m_name; };
 
@@ -32,6 +32,7 @@ public:
         m_radius(radius) {}
 
     virtual Intersection Intersect(const Ray& ray) override;
+    virtual float getArea() const override;
 
 private:
     Vec3 m_center;
@@ -54,6 +55,7 @@ public:
 
     virtual Intersection Intersect(const Ray& ray) override;
     virtual RandomSample<Vec2> sampleSurface() override;
+    virtual float getArea() const override;
     RandomSample<Vec2> sampleSurfaceWS();
 
     //TODO why evne have width and height instead of just using uv and v?

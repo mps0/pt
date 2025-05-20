@@ -35,7 +35,7 @@ int main()
     GlassMaterial greenGlass({0.0f, 1.0f, 0.0f});
 
     LightMaterial degenLightMat(Vec3(0.0f), 0.0f);
-    LightMaterial whiteLightMat(Vec3(1.0f), 0.005f);
+    LightMaterial whiteLightMat(Vec3(1.0f), 50.f);
     LightMaterial yellowLightMat(Vec3(1.0f, 1.0f, 0.0f), 2.5f);
     LightMaterial purpleLightMat(Vec3(1.0f, 0.0f, 1.0f), 2.5f);
 
@@ -71,16 +71,16 @@ int main()
     PointLight pointLight0(&yellowLightMat, Vec3(-1.0f, 1.99f, -4.5f));
     PointLight pointLight1(&purpleLightMat, Vec3(1.0f, 1.99f, -6.0f));
     PointLight pointLight2(&whiteLightMat, Vec3(0.0f, 1.99f, -5.0f));
-    //scene.addLight(&rectLight);
+    scene.addLight(&rectLight);
     //scene.addLight(&pointLight0);
-    scene.addLight(&pointLight2);
+   // scene.addLight(&pointLight2);
 
     PhotonMap photonmap;
-    photonmap.tracePhotons(scene, 100000);
+    photonmap.tracePhotons(scene, 10000);
 
     Window win(RES_X, RES_Y);
     Integrator integrator(MAX_DEPTH);
-    Renderer renderer(win, scene, integrator, photonmap,degToRad(FOV), SAMPLES_PER_PIXEL);
+    Renderer renderer(win, scene, integrator, photonmap,degToRad(FOV), SAMPLES_PER_PIXEL, true);
     renderer.render();
     
 

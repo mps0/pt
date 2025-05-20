@@ -20,14 +20,14 @@ public:
         Vec3 wP;
     };
 
-
     Light(LightMaterial* mat) :
         m_mat(mat),
         m_flags(0)
    {}
 
     virtual Sample sample()  = 0;
-    virtual Vec3 eval(Sample sample, Vec3 p) = 0;
+    virtual Vec3 evalLe(Sample sample, Vec3 p) = 0;
+    virtual Vec3 getTotalPower() = 0;
     virtual Intersection intersect(const Ray& ray)
     {
         return Intersection::NoHit;
@@ -57,7 +57,8 @@ public:
     {}
 
     virtual Sample sample()  override;
-    virtual Vec3 eval(Sample sample, Vec3 p) override;
+    virtual Vec3 evalLe(Sample sample, Vec3 p) override;
+    virtual Vec3 getTotalPower() override;
 
 private:
     Vec3 m_pos;
@@ -86,8 +87,9 @@ public:
 
     Prim* getPrim() override;
     virtual Sample sample() override;
-    virtual Vec3 eval(Sample sample, Vec3 p) override;
+    virtual Vec3 evalLe(Sample sample, Vec3 p) override;
     virtual Intersection intersect(const Ray& ray) override;
+    virtual Vec3 getTotalPower() override;
 
 private:
     Rectangle* m_rect;

@@ -17,7 +17,10 @@ public:
            Material(std::string name, Vec3 albedo, float ior = 1.0f) : m_name(name), m_albedo(albedo), m_ior(ior), m_flags(0) {}
            virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) = 0;
 
-           virtual Vec3 evalLe() const;
+           virtual Vec3 getRadiantExitance() const
+           {
+               return Vec3(0.0f);
+           }
            Vec3 getAlbedo();
            uint32_t getFlags();
            const std::string& getName();
@@ -50,10 +53,7 @@ public:
     }
 
     virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override;
-
-    virtual Vec3 evalLe() const override;
-
-    Vec3 getFlux() const;
+    virtual Vec3 getRadiantExitance() const override;
 
 private:
     Vec3 m_color;
