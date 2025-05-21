@@ -1,6 +1,6 @@
-#include <cfloat>
-#pragma one
+#pragma once
 
+#include <cfloat>
 #include "material.h"
 
 struct Intersection

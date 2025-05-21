@@ -1,11 +1,22 @@
 #include "light.h"
 #include "defs.h"
 #include "sampler.h"
+#include "utils.h"
 
 
 Light::Sample PointLight::sample() 
 {
     return {Vec2(0.f), 1.0f, m_pos};
+}
+
+Photon PointLight::shootPhoton(float weight)
+{
+    Photon photon;
+    photon.wDir = Sampler::the().sampleUniformSphere().sample;
+    photon.wPos = m_pos;
+    photon.flux = getTotalPower() * weight;
+
+    return photon;
 }
 
 Vec3 PointLight::evalLe(Sample sample, Vec3 p)
@@ -34,6 +45,22 @@ Light::Sample RectangleLight::sample()
     return {surfaceSample.sample, surfaceSample.invPDF, wP};
 }
 
+Photon RectangleLight::shootPhoton(float weight)
+{
+    Sample lightSample = sample();
+
+    Ray photonRay;
+    float invPdf;
+    makeHemisphereRay(lightSample.wP + C_EPS * m_rect->m_normal, m_rect->m_normal, photonRay, invPdf);
+
+    Photon photon;
+    photon.wPos = photonRay.o;
+    photon.wDir = photonRay.d;
+    photon.flux = getTotalPower() * weight;
+
+    return photon;
+}
+
 Vec3 RectangleLight::evalLe(Sample sample, Vec3 p)
 {
     Vec3 v = sample.wP - p;
@@ -42,7 +69,7 @@ Vec3 RectangleLight::evalLe(Sample sample, Vec3 p)
     if(cosL > 0.0f)
     {
         // Assumes a cosine-weighted emittance
-        return m_mat->getRadiantExitance() * C_INV_2PI * cosL * sample.invPDF;
+        return m_mat->getRadiantExitance() * C_INV_2PI * cosL * sample.invPDF / (dot(v, v));
     }
 
     return Vec3(0.f);

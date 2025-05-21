@@ -3,6 +3,7 @@
 #include "scene.h"
 #include "photon.h"
 #include "kdtree.h"
+#include "intersection.h"
 
 class PhotonMap
 {

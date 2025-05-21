@@ -1,34 +1,25 @@
 #include "photonmap.h"
 #include "material.h"
 #include "prim.h"
+#include "utils.h"
 
 void PhotonMap::tracePhotons(const Scene& scene, const uint32_t numPhotons)
 {
     std::vector<Light*> lights = scene.getLights();
     std::vector<Prim*> prims = scene.getPrims();
-
     for(Light* l : lights)
     {
+        float invNumPhotons = 1.0f / numPhotons;
         for(uint32_t i = 0; i < numPhotons; ++i)
         {
-            // just a single point light for now...
-
-            // sample the light surface
-            Light::Sample lightSample = l->sample();
-
-            // sample outgoing direction
-            //RandomSample<Vec3> sample = Sampler::the().sampleUniformSphere();
-            RandomSample<Vec3> sample = Sampler::the().sampleCosineHemisphere();
-
-            Ray ray;
-            ray.d = sample.sample;
-            ray.o = lightSample.wP;
+            Photon photon = l->shootPhoton(invNumPhotons);
+            Ray photonRay = Ray(photon.wPos, photon.wDir);
 
             // intersect scene
             Intersection rInter{false, FLT_MAX, Vec3(), Vec3(), nullptr};
             for(Prim* p : prims)
             {
-                Intersection inter = p->Intersect(ray);
+                Intersection inter = p->Intersect(photonRay);
                 if(inter.hit && inter.t < rInter.t)
                 {
                     rInter = inter;
@@ -40,14 +31,9 @@ void PhotonMap::tracePhotons(const Scene& scene, const uint32_t numPhotons)
                 continue;
             }
 
-            // store photon in map
-            Photon photon;
-            photon.flux = l->getTotalPower() / numPhotons;
+            // update photon pos
             photon.wPos = rInter.hitPoint;
-            photon.wDir = ray.d;
 
-            //std::cout << "HITPOINT: "; ::print(rInter.hitPoint); std::cout << std::endl;
-            //std::cout << "PUSHING BACK PHOTON" << std::endl;
             m_photons.push_back(photon);
         }
     }
@@ -67,13 +53,6 @@ std::vector<Photon> PhotonMap::getInterPhotons(uint32_t N, const Intersection& i
     {
         photons.push_back(m_kdtree.getNode(e.first).photon);
     }
-
-    //std::cout << "HEAP FINAL" << std::endl;
-    //heap.print();
-
-    //std::cout << "PHOTONS[0} FINAL" << std::endl;
-    //std::cout << "photons[0] pos: "; ::print(photons[0].wPos); std::cout << std::endl;
-    //std::cout << "m_tree[idx].pos: "; ::print(m_photons[hh[0].first].wPos); std::cout << std::endl;
 
     return photons;
 }

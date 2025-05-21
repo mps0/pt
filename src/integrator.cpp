@@ -7,6 +7,7 @@
 #include "ray.h"
 #include "sampler.h"
 #include "vec.h"
+#include "utils.h"
 
 Vec3 Integrator::intersect(Ray& ray, Scene& scene, PhotonMap& photonMap, bool usePhotonMap)
 {
@@ -17,6 +18,7 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
 {
     Vec3 Lo = Vec3(0.0f);
     if(depth > 0)
+    //if(depth > m_maxDepth)
     {
         return Lo;
     }
@@ -42,8 +44,13 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
         // emission
         if(rInter.mat->getFlags() & Material::EMISSIVE && depth == 0)
         {
-            //TODO
-            //Lo = rInter.mat->getPower();
+            float cosL = dot(rInter.normal, -ray.d);
+
+            if(cosL > 0.0f)
+            {
+                Vec3 Le = rInter.mat->getRadiantExitance() * C_INV_2PI * cosL;
+                Lo = Lo + Le;
+            }
         }
         else
         {
@@ -156,7 +163,7 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
     if(zeta < p)
     {
         //bounce
-        Lo = Lo + (temp * traceRay(outRay, scene, throughput, depth + 1, photonMap, ior)) * (1.0f / p);
+        Lo = Lo + (temp * traceRay(outRay, scene, throughput, depth + 1, photonMap, usePhotonMap, ior)) * (1.0f / p);
     }
     return Lo;
 }
@@ -220,7 +227,7 @@ Vec3 Integrator::computeDirectLigting(const Ray& ray, const Scene& scene, const 
 
                 if(l->getFlags() & Light::INTERSECTABLE)
                 {
-                    Le = Le * 0.5f;
+                    Le = Le;
                 }
 
                 LeSamps.emplace_back(Le, lightSamplePdf);
@@ -280,17 +287,4 @@ Vec3 Integrator::computeDirectLigting(const Ray& ray, const Scene& scene, const 
     }
 
     return contrib;
-}
-
-void Integrator::makeHemisphereRay(const Vec3& o, const Vec3& normal, Ray& outRay, float& invPdf)
-{
-    RandomSample<Vec3> samp = Sampler::the().sampleCosineHemisphere();
-    outRay.o = o + C_EPS * normal;
-    Vec3 helper = std::abs(normal.z) < 0.99f ? Vec3(0.0f, 0.0f, 1.0f) : Vec3(0.0, 1.0f, 0.0f);
-    Vec3 T = normalize(cross(helper, normal));
-    Vec3 B = normalize(cross(normal, T));
-    Vec3 sampWS = samp.sample.x * T + samp.sample.y * B + samp.sample.z * normal;
-    outRay.d = normalize(sampWS);
-
-    invPdf = samp.invPDF;
 }

@@ -13,7 +13,7 @@ constexpr float FOV = 20.f;
 constexpr float ASPECT_RATIO = 0.75f;
 constexpr float RES_Y = 600.f;
 constexpr float RES_X = RES_Y * ASPECT_RATIO;
-constexpr uint32_t SAMPLES_PER_PIXEL = 1;
+constexpr uint32_t SAMPLES_PER_PIXEL = 100;
 constexpr uint32_t MAX_DEPTH = 10;
 
 int main()
@@ -41,9 +41,9 @@ int main()
 
     Scene scene;
     //Spheres
-    //Sphere sphere0 = Sphere(&glass, Vec3(-1.0f, 0.0f, -5.0f), 0.5f);
+    Sphere sphere0 = Sphere(&red, Vec3(-1.0f, 0.0f, -5.0f), 0.5f);
     //Sphere sphere0 = Sphere(&glass, Vec3(0.0f, 0.0f, -5.0f), 0.5f);
-    //Sphere sphere1 = Sphere(&glass, Vec3(0.0f, -0.75f, -5.0f), 0.75f);
+    Sphere sphere1 = Sphere(&green, Vec3(0.0f, -0.75f, -5.0f), 0.75f);
     //Walls
     //left wall
     Rectangle leftWall = Rectangle(&grey, Vec3(-1.5f, 0.f, -5.0f), Vec3(0.f, 0.f, -1.f), Vec3(0.f, 1.f, 0.f), 3.0f, 4.0f);
@@ -57,8 +57,8 @@ int main()
     //ceiling
     Rectangle ceiling = Rectangle(&lightBrown, Vec3(0.0f, 2.0f, -5.0f), Vec3(1.f, 0.f, 0.f), Vec3(0.f, 0.f, 1.f), 3.0f, 3.f);
 
-    //scene.addPrim(&sphere0);
-    //scene.addPrim(&sphere1);
+    scene.addPrim(&sphere0);
+    scene.addPrim(&sphere1);
     scene.addPrim(&leftWall);
     scene.addPrim(&backWall);
     scene.addPrim(&rightWall);
@@ -76,7 +76,7 @@ int main()
    // scene.addLight(&pointLight2);
 
     PhotonMap photonmap;
-    photonmap.tracePhotons(scene, 10000);
+    photonmap.tracePhotons(scene, 100000);
 
     Window win(RES_X, RES_Y);
     Integrator integrator(MAX_DEPTH);
