@@ -20,9 +20,9 @@ Vec3 NEEIntegrator::computeLo(const Ray& ray, Vec3 throughput, const Intersectio
     bool materialReflects = length(inter.mat->getAlbedo()) > 0.0f ? true : false;
     if(materialReflects)
     {
-        Lo += computeDirectLigting(ray, inter);
+        Lo += 0.5f * computeDirectLigting(ray, inter);
     }
-    if(inter.mat->getFlags() & Material::SPECULAR)
+    if(inter.mat->getFlags() & Material::REFLECTS)
     {
         float fresnel = 1.0f; 
         Vec3 refractDir;
@@ -78,8 +78,10 @@ Vec3 NEEIntegrator::computeDirectLigting(const Ray& ray, const Intersection& int
 
     std::vector<std::pair<Vec3, float>> LeSamps;
 
-    bool isSpecular = inter.mat->getFlags() & Material::SPECULAR;
-    if(!isSpecular)
+    //TODO terrifble flag....
+    //bool reflects = inter.mat->getFlags() & Material::REFLECTS;
+    bool temp = max(inter.mat->getAlbedo()) > 0.0f;
+    if(temp)
     {
         for(Light* l : lights)
         {
@@ -98,22 +100,16 @@ Vec3 NEEIntegrator::computeDirectLigting(const Ray& ray, const Intersection& int
                 // NEE
                 lightSamplePdf = 1.0f / lightSample.invPDF;
                 Vec3 Le = l->evalLe(lightSample, inter.hitPoint) * dot(inter.normal, lightRay.d) * lightSample.invPDF * inter.mat->evalBrdf(lightRay.d, ray.d, inter.hitPoint);
-
-                if(l->getFlags() & Light::INTERSECTABLE)
-                {
-                    Le = Le;
-                }
-
                 LeSamps.emplace_back(Le, lightSamplePdf);
             }
-
         }
     }
+
     // brdf sampling
     Ray outRay;
     float brdfPdf = 0.0f;
     Vec3 brdf(0.0f);
-    if(inter.mat->getFlags() & Material::SPECULAR)
+    if(inter.mat->getFlags() & Material::REFLECTS)
     {
         outRay.o = inter.hitPoint + C_EPS * inter.normal;
         Vec3 n = inter.normal;

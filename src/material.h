@@ -7,14 +7,24 @@
 class Material
 {
 public:
-    enum : uint32_t
+    enum Flags : uint32_t
            {
                EMISSIVE = 1,
-               SPECULAR = 1 << 1,
-               REFRACTS = 1 << 2 
+               REFLECTS = 1 << 1,
+               REFRACTS = 1 << 2,
            };
 
-           Material(std::string name, Vec3 albedo, float ior = 1.0f) : m_name(name), m_albedo(albedo), m_ior(ior), m_flags(0) {}
+    enum Type : uint32_t
+    {
+        BASE = 0,
+        LAMBERTIAN = 1,
+        LIGHT = 2,
+        SPECULAR = 3,
+        GLASS
+    };
+
+
+           Material(std::string name, Vec3 albedo, Type type, float ior = 1.0f) : m_name(name), m_albedo(albedo), m_type(type), m_ior(ior), m_flags(0) {}
            virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) = 0;
 
            virtual Vec3 getRadiantExitance() const
@@ -25,10 +35,15 @@ public:
            uint32_t getFlags();
            const std::string& getName();
            float getIor();
+           Type getType() const
+           {
+               return m_type;
+           }
 
 protected:
            std::string m_name;
            Vec3 m_albedo;
+           const Type m_type;
            float m_ior;
            uint32_t m_flags;
 };
@@ -36,7 +51,7 @@ protected:
 class LambertianMaterial : public Material
 {
 public:
-    LambertianMaterial(Vec3 albedo, std::string name = "LambertianMaterial") : Material(name, albedo), m_color(albedo) {}
+    LambertianMaterial(Vec3 albedo, std::string name = "LambertianMaterial") : Material(name, albedo, LAMBERTIAN), m_color(albedo) {}
     virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override;
 
 private:
@@ -47,7 +62,7 @@ private:
 class LightMaterial : public Material
 {
 public:
-    LightMaterial(Vec3 color, float intensity, std::string name = "LightMaterial") : Material(name, Vec3(0.f)), m_color(color), m_intensity(intensity)
+    LightMaterial(Vec3 color, float intensity, std::string name = "LightMaterial") : Material(name, Vec3(0.f), LIGHT), m_color(color), m_intensity(intensity)
     {
         m_flags |= EMISSIVE;
     }
@@ -63,7 +78,7 @@ private:
 class SpecularMaterial : public Material
 {
 public:
-    SpecularMaterial(Vec3 albedo,std::string name = "SpecularMaterial") : Material(name, albedo) 
+    SpecularMaterial(Vec3 albedo,std::string name = "SpecularMaterial") : Material(name, albedo, SPECULAR) 
     {
         m_flags |= SPECULAR;
     }
@@ -74,7 +89,7 @@ public:
 class GlassMaterial : public Material
 {
 public:
-    GlassMaterial(Vec3 albedo,std::string name = "GlassMaterial") : Material(name, albedo, 1.5f) 
+    GlassMaterial(Vec3 albedo,std::string name = "GlassMaterial") : Material(name, albedo, GLASS, 1.5f)
     {
         m_flags |= SPECULAR;
         m_flags |= REFRACTS;

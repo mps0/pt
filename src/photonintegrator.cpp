@@ -14,29 +14,32 @@ Vec3 PhotonIntegrator::computeLo(const Ray& ray, Vec3 throughput, const Intersec
             Lo = Lo + Le;
         }
     }
-    // evaluate photons
-    std::vector<Photon> photons = m_photonmap.getInterPhotons(m_N, inter);
-
-    Vec3 photonAccum;
-    uint32_t num = 0;
-    for(Photon& p : photons)
+    if(inter.mat->getType() == Material::LAMBERTIAN)
     {
-        photonAccum += p.flux;
-        ++num;
-    }
+        // evaluate photons
+        std::vector<Photon> photons = m_photonmap.getInterPhotons(m_N, inter);
 
-    if(num > 0)
-    {
-        Vec3 flux = photonAccum;
+        Vec3 photonAccum;
+        uint32_t num = 0;
+        for(Photon& p : photons)
+        {
+            photonAccum += p.flux;
+            ++num;
+        }
 
-        Vec3 furthestP = photons.back().wPos;
-        Vec3 xp = furthestP - inter.hitPoint;
-        float radiusSquared = dot(xp, xp);
-        float area = C_PI * radiusSquared;
-        Vec3 irradiance = flux / area;
+        if(num > 0)
+        {
+            Vec3 flux = photonAccum;
 
-        Vec3 radiance = irradiance * inter.mat->getAlbedo() * C_INV_PI; //TODO
-        Lo = Lo + radiance;
+            Vec3 furthestP = photons.back().wPos;
+            Vec3 xp = furthestP - inter.hitPoint;
+            float radiusSquared = dot(xp, xp);
+            float area = C_PI * radiusSquared;
+            Vec3 irradiance = flux / area;
+
+            Vec3 radiance = irradiance * inter.mat->getAlbedo() * C_INV_PI; //TODO
+            Lo = Lo + radiance;
+        }
     }
     return Lo;
 }
