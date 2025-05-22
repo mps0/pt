@@ -11,7 +11,7 @@
 
 class Renderer
 {
-public: Renderer(Window& win, Scene& scene, Integrator& integrator, PhotonMap& photonmap, float fov, uint32_t samplesPerPixel, bool usePhotonMap) : m_win(win), m_scene(scene), m_integrator(integrator), m_photonmap(photonmap), m_fov(fov), m_samplesPerPixel(samplesPerPixel), m_usePhotonMap(usePhotonMap)
+public: Renderer(Window& win, Scene& scene, Integrator& integrator, PhotonMap& photonmap, float fov, uint32_t samplesPerPixel) : m_win(win), m_scene(scene), m_integrator(integrator), m_photonmap(photonmap), m_fov(fov), m_samplesPerPixel(samplesPerPixel)
     {
         m_accum = reinterpret_cast<Vec3*>(calloc(m_win.getHeight() * m_win.getWidth(), sizeof(Vec3)));
     }

@@ -19,7 +19,11 @@ add_executable( ${PROJECT_NAME}
     src/material.h
     src/maxheap.cpp
     src/maxheap.h
+    src/neeintegrator.cpp
+    src/neeintegrator.h
     src/photon.h
+    src/photonintegrator.cpp
+    src/photonintegrator.h
     src/photonmap.cpp
     src/photonmap.h
     src/pixel.h

@@ -26,7 +26,7 @@ void KDTree::createTree(std::vector<Photon>& data)
     }
 }
 
-void KDTree::search(const Vec3& x, MaxHeap& heap, size_t  rootIdx, uint8_t dim)
+void KDTree::search(const Vec3& x, MaxHeap& heap, size_t  rootIdx, uint8_t dim) const
 {
     if(rootIdx == INVALID_INDEX)
     {
@@ -73,7 +73,7 @@ void KDTree::search(const Vec3& x, MaxHeap& heap, size_t  rootIdx, uint8_t dim)
     heap.insert({rootIdx, distToPhotonSquared});
 }
 
-const KDTree::Node& KDTree::getNode(size_t idx)
+const KDTree::Node& KDTree::getNode(size_t idx) const
 {
     return m_tree[idx];
 }

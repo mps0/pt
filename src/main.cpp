@@ -1,5 +1,8 @@
 #include "light.h"
 #include "material.h"
+#include "neeintegrator.h"
+#include "photonintegrator.h"
+#include "photonmap.h"
 #include "utils.h"
 #include "vec.h"
 #include "window.h"
@@ -7,7 +10,6 @@
 #include "scene.h"
 #include "prim.h"
 #include "utils.h"
-#include "kdtree.h"
 
 constexpr float FOV = 20.f;
 constexpr float ASPECT_RATIO = 0.75f;
@@ -15,6 +17,8 @@ constexpr float RES_Y = 600.f;
 constexpr float RES_X = RES_Y * ASPECT_RATIO;
 constexpr uint32_t SAMPLES_PER_PIXEL = 100;
 constexpr uint32_t MAX_DEPTH = 10;
+constexpr uint32_t NUM_PHOTONS = 1e6;
+constexpr uint32_t PHOTONS_PER_SAMPLE = 25;
 
 int main()
 {
@@ -75,12 +79,16 @@ int main()
     //scene.addLight(&pointLight0);
     //scene.addLight(&pointLight2);
 
-    PhotonMap photonmap;
-    photonmap.tracePhotons(scene, 100000);
 
     Window win(RES_X, RES_Y);
-    Integrator integrator(MAX_DEPTH);
-    Renderer renderer(win, scene, integrator, photonmap,degToRad(FOV), SAMPLES_PER_PIXEL, true);
+    //NEEIntegrator integrator(MAX_DEPTH);
+    
+    
+    PhotonMap photonmap;
+    photonmap.tracePhotons(scene, NUM_PHOTONS);
+    PhotonIntegrator integrator(scene, MAX_DEPTH, photonmap, PHOTONS_PER_SAMPLE);
+
+    Renderer renderer(win, scene, integrator, photonmap,degToRad(FOV), SAMPLES_PER_PIXEL);
     renderer.render();
 
     return 0;

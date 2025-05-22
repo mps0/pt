@@ -11,7 +11,7 @@ public:
 
     void tracePhotons(const Scene& scene, const uint32_t numPhotons);
 
-    std::vector<Photon> getInterPhotons(uint32_t N, const Intersection& inter);
+    std::vector<Photon> getInterPhotons(uint32_t N, const Intersection& inter) const;
 
 private:
 

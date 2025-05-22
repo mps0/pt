@@ -41,7 +41,7 @@ void PhotonMap::tracePhotons(const Scene& scene, const uint32_t numPhotons)
     m_kdtree.createTree(m_photons);
 }
 
-std::vector<Photon> PhotonMap::getInterPhotons(uint32_t N, const Intersection& inter)
+std::vector<Photon> PhotonMap::getInterPhotons(uint32_t N, const Intersection& inter) const
 {
     MaxHeap heap(N);
     m_kdtree.search(inter.hitPoint, heap, 0, 0); 

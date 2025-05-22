@@ -28,8 +28,8 @@ public:
     void createTree(std::vector<Photon>& data);
 
 
-    void search(const Vec3& x, MaxHeap& heap, size_t  rootIdx, uint8_t dim);
-    const Node& getNode(size_t idx);
+    void search(const Vec3& x, MaxHeap& heap, size_t  rootIdx, uint8_t dim) const;
+    const Node& getNode(size_t idx) const;
 
 private:
 

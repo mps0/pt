@@ -1,5 +1,6 @@
 #pragma once
 
+#include "intersection.h"
 #include "prim.h"
 #include "ray.h"
 #include "scene.h"
@@ -8,15 +9,20 @@
 class Integrator
 {
 public:
-    Integrator(uint32_t maxDepth) :  m_maxDepth(maxDepth) {}
-    Vec3 intersect(Ray& ray, Scene& scene, PhotonMap& photonMap, bool usePhotonMap);
+    Integrator(const Scene& scene, uint32_t maxDepth) :  m_scene(scene), m_maxDepth(maxDepth) {}
+    Vec3 intersect(Ray& ray);
+
+protected:
+    Vec3 traceRay(const Ray& ray, Vec3 throughput, uint32_t depth, float ior = 1.0f);
+    virtual Vec3 computeLo(const Ray& ray, Vec3 throughput, const Intersection& inter, uint32_t depth, uint32_t ior) = 0;
+
+    //TODO
+    bool queryVisibility(const Ray& ray, const float tMax = FLT_MAX);
+    Intersection intersectLights(const Ray& ray);
+
+    const Scene& m_scene;
+    uint32_t m_maxDepth;
 
 private:
-    Vec3 traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, uint32_t depth, PhotonMap& photonMap, bool usePhotonMap, float ior = 1.0f);
-    bool queryVisibility(const Ray& ray, const Scene& scene, const float tMax = FLT_MAX);
-    Vec3 computeDirectLigting(const Ray& ray, const Scene& scene, const Intersection& inter);
-    Intersection intersectLights(const Ray& ray, const Scene& scene);
 
-
-    uint32_t m_maxDepth;
 };
