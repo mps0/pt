@@ -8,9 +8,11 @@ First render:
 Comparing standard path tracing with photon mapping:
 
 Standard path tracing:
+
 <img src="imgs/pt.png" width="517">
 
 Photonmap:
+
 <img src="imgs/photonmap_N25.png" width="517">
 
 
