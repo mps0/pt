@@ -23,8 +23,7 @@ Vec3 PointLight::evalLe(Sample sample, Vec3 p)
 {
     Vec3 v = sample.wP - p;
 
-    //return  (m_mat->getRadiantExitance() *  C_INV_4PI) / (1.0f + dot(v,v)) * sample.invPDF;
-    return  (m_mat->getRadiantExitance() *  C_INV_4PI) / (dot(v,v)) * sample.invPDF;
+    return  (m_mat->getRadiantExitance() *  C_INV_4PI) / std::max(dot(v,v), C_EPS) * sample.invPDF;
 }
 
 Vec3 PointLight::getTotalPower()
@@ -68,8 +67,12 @@ Vec3 RectangleLight::evalLe(Sample sample, Vec3 p)
 
     if(cosL > 0.0f)
     {
-        // Assumes a cosine-weighted emittance
-        return m_mat->getRadiantExitance() * C_INV_2PI * cosL * sample.invPDF / (dot(v, v));
+        // Since the rectangle light has a cosine-weighted emiitance
+        // and E[cos] = 2 / pi
+        // we weight the radiant existance by pi / 2
+        // so the total power emitted is correct
+        Vec3 cosWeightedExitance = m_mat->getRadiantExitance() * C_PI * 0.5f;
+        return cosWeightedExitance * cosL * C_INV_2PI * sample.invPDF / std::max(dot(v, v), C_EPS);
     }
 
     return Vec3(0.f);

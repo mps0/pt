@@ -73,7 +73,7 @@ int main()
     PointLight pointLight2(&whiteLightMat, Vec3(0.0f, 1.99f, -5.0f));
     scene.addLight(&rectLight);
     //scene.addLight(&pointLight0);
-   // scene.addLight(&pointLight2);
+    //scene.addLight(&pointLight2);
 
     PhotonMap photonmap;
     photonmap.tracePhotons(scene, 100000);
@@ -82,39 +82,6 @@ int main()
     Integrator integrator(MAX_DEPTH);
     Renderer renderer(win, scene, integrator, photonmap,degToRad(FOV), SAMPLES_PER_PIXEL, true);
     renderer.render();
-    
-
-    //std::vector<Vec3> test = {
-    //    {3, 6, 2}, {17, 15, 2}, {13, 15, 2}, {6, 12, 2}, {9, 1, 2}, {2, 7, 2}, {10, 19, 2}
-    //};
-
-    //std::vector<Photon> test2 = {
-    //    Photon({3, 6, 2}), 
-    //    Photon({17, 15, 2}), 
-    //    Photon({13, 15, 2}), 
-    //    Photon({6, 12, 2}),
-    //    Photon({9, 1, 2}),
-    //    Photon({2, 7, 2}),
-    //    Photon({10, 19, 2})
-    //};
-
-    //MaxHeap heap(5);
-
-    //Vec3 x(0, 0, 0);
-
-    //KDTree kdTree(test2);
-    //kdTree.search(x, heap, 0, 0);
-
-    //auto hd = heap.getHeap();
-    //for(auto h : hd)
-    //{
-    //    size_t idx = h.first;
-    //    size_t dist = h.second;
-    //    KDTree::Node n = kdTree.getNode(idx);
-
-    //    std::cout << "Node " << idx << ": " <<  "pos: "; print(n.photon.wPos); std::cout << std::endl;
-    //}
-    //kdTree.printTree();
 
     return 0;
 }

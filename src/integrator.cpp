@@ -17,8 +17,8 @@ Vec3 Integrator::intersect(Ray& ray, Scene& scene, PhotonMap& photonMap, bool us
 Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, uint32_t depth, PhotonMap& photonMap, bool usePhotonMap, float ior)
 {
     Vec3 Lo = Vec3(0.0f);
-    if(depth > 0)
-    //if(depth > m_maxDepth)
+    //if(depth > 0)
+    if(depth > m_maxDepth)
     {
         return Lo;
     }
@@ -52,32 +52,29 @@ Vec3 Integrator::traceRay(const Ray& ray, const Scene& scene, Vec3 throughput, u
                 Lo = Lo + Le;
             }
         }
-        else
+        // evaluate photons
+        std::vector<Photon> photons = photonMap.getInterPhotons(25, rInter);
+
+        Vec3 photonAccum;
+        uint32_t num = 0;
+        for(Photon& p : photons)
         {
-            // evaluate photons
-            std::vector<Photon> photons = photonMap.getInterPhotons(100, rInter);
+            photonAccum += p.flux;
+            ++num;
+        }
 
-            Vec3 photonAccum;
-            uint32_t num = 0;
-            for(Photon& p : photons)
-            {
-                photonAccum += p.flux;
-                ++num;
-            }
+        if(num > 0)
+        {
+            Vec3 flux = photonAccum;
 
-            if(num > 0)
-            {
-                Vec3 flux = photonAccum;
+            Vec3 furthestP = photons.back().wPos;
+            Vec3 xp = furthestP - rInter.hitPoint;
+            float radiusSquared = dot(xp, xp);
+            float area = C_PI * radiusSquared;
+            Vec3 irradiance = flux / area;
 
-                Vec3 furthestP = photons.back().wPos;
-                Vec3 xp = furthestP - rInter.hitPoint;
-                float radiusSquared = dot(xp, xp);
-                float area = C_PI * radiusSquared;
-                Vec3 irradiance = flux / area;
-
-                Vec3 radiance = irradiance * rInter.mat->getAlbedo() * C_INV_PI; //TODO
-                Lo = radiance;
-            }
+            Vec3 radiance = irradiance * rInter.mat->getAlbedo() * C_INV_PI; //TODO
+            Lo = Lo + radiance;
         }
     }
     else
@@ -265,8 +262,14 @@ Vec3 Integrator::computeDirectLigting(const Ray& ray, const Scene& scene, const 
     {
         if(queryVisibility(outRay, scene, lightInter.t))
         {
-            //TODO
-            //LeSamps.emplace_back(lightInter.mat->evalLe() * brdf * dot(inter.normal, outRay.d) / brdfPdf, brdfPdf);
+            Vec3 v = lightInter.hitPoint - ray.o;
+            float cosL = -dot(lightInter.normal, normalize(v));
+
+            if(cosL > 0.0f)
+            {
+                Vec3 cosWeightedExitance = lightInter.mat->getRadiantExitance() * C_PI * 0.5f;
+                LeSamps.emplace_back(cosWeightedExitance * cosL * C_INV_2PI  * brdf * dot(inter.normal, outRay.d) / brdfPdf, brdfPdf);
+            }
         }
     }
 
