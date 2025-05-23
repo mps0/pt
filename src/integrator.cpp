@@ -7,6 +7,7 @@
 #include "sampler.h"
 #include "vec.h"
 #include "utils.h"
+#include <cassert>
 
 Vec3 Integrator::intersect(Ray& ray)
 {
@@ -44,7 +45,8 @@ Vec3 Integrator::traceRay(const Ray& ray, Vec3 throughput, uint32_t depth, float
     Vec3 n = dot(rInter.normal, -ray.d) > 0.0f ? rInter.normal : -rInter.normal;
     BsdfSample bsdfSample = rInter.mat->getBsdf().sample(rInter.hitPoint, -ray.d, n, ior, rInter.mat->getIor());
 
-    Vec3 contrib = rInter.mat->getBsdf().computeContrib(bsdfSample, n) * rInter.mat->getAlbedo();
+    Vec3 contrib = rInter.mat->getBsdf().computeContrib(bsdfSample) * rInter.mat->getAlbedo() * dot(n, bsdfSample.s.wo);
+    assert(dot(n, bsdfSample.s.wo) >= 0.0f);
     throughput = throughput * contrib;
 
     float zeta = Sampler::the().sampleUniformUnitInterval();

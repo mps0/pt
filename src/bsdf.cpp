@@ -33,7 +33,7 @@ BsdfSample Bsdf::sample(const Vec3& wP, const Vec3& wi, const Vec3& normal, cons
 }
 
 
-Vec3 Bsdf::computeContrib(const BsdfSample sample, const Vec3& normal) const
+Vec3 Bsdf::computeContrib(const BsdfSample sample) const
 {
     if(m_flags & BLACKBODY || m_flags == 0)
     {
@@ -42,7 +42,7 @@ Vec3 Bsdf::computeContrib(const BsdfSample sample, const Vec3& normal) const
 
     if(m_flags & DIFFUSE)
     {
-        return sample.s.rho * sample.invPdf * dot(normal, sample.s.wo);
+        return sample.s.rho * sample.invPdf;
     }
 
     if(m_flags & (SPECULAR | TRANSMISSIVE))

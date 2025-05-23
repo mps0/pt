@@ -31,7 +31,7 @@ public:
 
     uint32_t getFlags() const;
     BsdfSample sample(const Vec3& wP, const Vec3& wi, const Vec3& normal, const float eta_i = 1.0f, const float eta_t = 1.0f) const;
-    Vec3 computeContrib(const BsdfSample sample, const Vec3& normal) const;
+    Vec3 computeContrib(const BsdfSample sample) const;
 
 private: 
     BsdfSample sampleSpecular(const Vec3& wP, const Vec3& wi, const Vec3& normal, const float ior, const float fresnel) const;
