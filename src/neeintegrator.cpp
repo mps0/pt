@@ -63,30 +63,30 @@ Vec3 NEEIntegrator::computeDirectLigting(const Ray& ray, const Intersection& int
         }
     }
 
-    //// brdf sampling
-    //BsdfSample bsdfSample = inter.mat->getBsdf().sample(inter.hitPoint, -ray.d, inter.normal);
+    // brdf sampling
+    BsdfSample bsdfSample = inter.mat->getBsdf().sample(inter.hitPoint, -ray.d, inter.normal);
 
-    //Ray outRay(bsdfSample.s.wP, bsdfSample.s.wo);
-    //Intersection lightInter = intersectLights(outRay);
-    //if(lightInter.hit)
-    //{
-    //    if(queryVisibility(outRay, lightInter.t))
-    //    {
-    //        Vec3 v = lightInter.hitPoint - ray.o;
-    //        float cosL = -dot(lightInter.normal, normalize(v));
+    Ray outRay(bsdfSample.s.wP, bsdfSample.s.wo);
+    Intersection lightInter = intersectLights(outRay);
+    if(lightInter.hit)
+    {
+        if(queryVisibility(outRay, lightInter.t))
+        {
+            Vec3 v = lightInter.hitPoint - outRay.o;
+            float cosL = dot(lightInter.normal, normalize(v));
 
-    //        if(cosL > 0.0f)
-    //        {
-    //            Vec3 cosWeightedExitance = lightInter.mat->getRadiantExitance() * C_PI * 0.5f;
-    //                
-    //            Vec3 contrib = inter.mat->getBsdf().computeContrib(bsdfSample, inter.normal) * bsdfSample.invPdf * dot(outRay.d, inter.normal);
+            if(cosL > 0.0f)
+            {
+                Vec3 cosWeightedExitance = lightInter.mat->getRadiantExitance() * C_PI * 0.5f;
+                    
+                Vec3 contrib = inter.mat->getBsdf().computeContrib(bsdfSample) * bsdfSample.invPdf * dot(outRay.d, inter.normal);
 
-    //            Vec3 Le = cosWeightedExitance * cosL * C_INV_2PI  * contrib;
-    //            Le = 0.5f * Le;
-    //            LeSamps.emplace_back(Le, 1.0f / bsdfSample.invPdf);
-    //        }
-    //    }
-    //}
+                Vec3 Le = cosWeightedExitance * cosL * C_INV_2PI  * contrib;
+                Le = 0.5f * Le;
+                LeSamps.emplace_back(Le, 1.0f / std::max(C_EPS, bsdfSample.invPdf));
+            }
+        }
+    }
 
     float pdfAccum = 0.0f;
     for(auto s : LeSamps)
