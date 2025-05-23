@@ -11,7 +11,7 @@
 
 class Renderer
 {
-public: Renderer(Window& win, Scene& scene, Integrator& integrator, float fov, uint32_t samplesPerPixel) : m_win(win), m_scene(scene), m_integrator(integrator), m_fov(fov), m_samplesPerPixel(samplesPerPixel)
+public: Renderer(Window& win, Scene& scene, Integrator& integrator, float fov, uint32_t samplesPerPixel, PhotonMap* photonmap = nullptr) : m_win(win), m_scene(scene), m_integrator(integrator), m_fov(fov), m_samplesPerPixel(samplesPerPixel), m_photonmap(photonmap)
     {
         m_accum = reinterpret_cast<Vec3*>(calloc(m_win.getHeight() * m_win.getWidth(), sizeof(Vec3)));
     }
@@ -42,7 +42,7 @@ private:
     float m_fov;
     uint32_t m_samplesPerPixel;
     Vec3* m_accum;
-    bool m_usePhotonMap;
+    PhotonMap* m_photonmap;
 
     std::mutex m_queueMutex;
     std::mutex m_winMutex;

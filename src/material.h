@@ -1,19 +1,11 @@
 #pragma once
 
-#include "defs.h"
 #include "vec.h"
-
+#include "bsdf.h"
 
 class Material
 {
 public:
-    enum Flags : uint32_t
-           {
-               EMISSIVE = 1,
-               REFLECTS = 1 << 1,
-               REFRACTS = 1 << 2,
-           };
-
     enum Type : uint32_t
     {
         BASE = 0,
@@ -24,50 +16,40 @@ public:
     };
 
 
-           Material(std::string name, Vec3 albedo, Type type, float ior = 1.0f) : m_name(name), m_albedo(albedo), m_type(type), m_ior(ior), m_flags(0) {}
-           virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) = 0;
+           Material(std::string name, Vec3 albedo, Bsdf bsdf, Type type, float ior = 1.0f) : m_name(name), m_albedo(albedo), m_bsdf(bsdf), m_type(type), m_ior(ior) {}
 
-           virtual Vec3 getRadiantExitance() const
-           {
-               return Vec3(0.0f);
-           }
+           virtual Vec3 getRadiantExitance() const;
            Vec3 getAlbedo();
            uint32_t getFlags();
            const std::string& getName();
            float getIor();
-           Type getType() const
-           {
-               return m_type;
-           }
+           Type getType() const;
+           const Bsdf& getBsdf();
 
 protected:
+           Bsdf m_bsdf;
            std::string m_name;
            Vec3 m_albedo;
            const Type m_type;
            float m_ior;
-           uint32_t m_flags;
 };
 
 class LambertianMaterial : public Material
 {
 public:
-    LambertianMaterial(Vec3 albedo, std::string name = "LambertianMaterial") : Material(name, albedo, LAMBERTIAN), m_color(albedo) {}
-    virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override;
+    LambertianMaterial(Vec3 albedo, std::string name = "LambertianMaterial") : Material(name, albedo, Bsdf(Bsdf::DIFFUSE), LAMBERTIAN) {}
 
 private:
-    Vec3 m_color;
     float m_eta;
 };
 
 class LightMaterial : public Material
 {
 public:
-    LightMaterial(Vec3 color, float intensity, std::string name = "LightMaterial") : Material(name, Vec3(0.f), LIGHT), m_color(color), m_intensity(intensity)
+    LightMaterial(Vec3 color, float intensity, std::string name = "LightMaterial") : Material(name, Vec3(0.f), Bsdf(Bsdf::BLACKBODY), LIGHT), m_color(color), m_intensity(intensity)
     {
-        m_flags |= EMISSIVE;
     }
 
-    virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override;
     virtual Vec3 getRadiantExitance() const override;
 
 private:
@@ -78,22 +60,15 @@ private:
 class SpecularMaterial : public Material
 {
 public:
-    SpecularMaterial(Vec3 albedo,std::string name = "SpecularMaterial") : Material(name, albedo, SPECULAR) 
+    SpecularMaterial(Vec3 albedo,std::string name = "SpecularMaterial") : Material(name, albedo, Bsdf(Bsdf::SPECULAR), SPECULAR) 
     {
-        m_flags |= SPECULAR;
     }
-
-    virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override;
 };
 
 class GlassMaterial : public Material
 {
 public:
-    GlassMaterial(Vec3 albedo,std::string name = "GlassMaterial") : Material(name, albedo, GLASS, 1.5f)
+    GlassMaterial(Vec3 albedo, std::string name = "GlassMaterial") : Material(name, albedo, Bsdf(Bsdf::SPECULAR | Bsdf::TRANSMISSIVE), GLASS, 1.5f)
     {
-        m_flags |= SPECULAR;
-        m_flags |= REFRACTS;
     }
-
-    virtual Vec3 evalBrdf(Vec3 wo, Vec3 wi, Vec3 p) override;
 };

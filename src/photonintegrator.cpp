@@ -4,7 +4,7 @@ Vec3 PhotonIntegrator::computeLo(const Ray& ray, Vec3 throughput, const Intersec
 {
     Vec3 Lo(0.f);
     // emission
-    if(inter.mat->getFlags() & Material::EMISSIVE && depth == 0)
+    if(inter.mat->getType() == Material::LIGHT && depth == 0)
     {
         float cosL = dot(inter.normal, -ray.d);
 
@@ -14,6 +14,7 @@ Vec3 PhotonIntegrator::computeLo(const Ray& ray, Vec3 throughput, const Intersec
             Lo = Lo + Le;
         }
     }
+
     if(inter.mat->getType() == Material::LAMBERTIAN)
     {
         // evaluate photons
@@ -40,6 +41,10 @@ Vec3 PhotonIntegrator::computeLo(const Ray& ray, Vec3 throughput, const Intersec
             Vec3 radiance = irradiance * inter.mat->getAlbedo() * C_INV_PI; //TODO
             Lo = Lo + radiance;
         }
+    }
+    else
+    {
+
     }
     return Lo;
 }

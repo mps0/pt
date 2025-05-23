@@ -1,10 +1,8 @@
 #pragma once
 
 #include "intersection.h"
-#include "prim.h"
 #include "ray.h"
 #include "scene.h"
-#include "photonmap.h"
 
 class Integrator
 {

@@ -8,8 +8,8 @@
 template <typename T>
 struct RandomSample
 {
-    T sample;
-    float invPDF;
+    T s;
+    float invPdf;
 };
 
 

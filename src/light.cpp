@@ -12,7 +12,7 @@ Light::Sample PointLight::sample()
 Photon PointLight::shootPhoton(float weight)
 {
     Photon photon;
-    photon.wDir = Sampler::the().sampleUniformSphere().sample;
+    photon.wDir = Sampler::the().sampleUniformSphere().s;
     photon.wPos = m_pos;
     photon.flux = getTotalPower() * weight;
 
@@ -40,8 +40,8 @@ Prim* RectangleLight::getPrim()
 Light::Sample RectangleLight::sample()
 {
     RandomSample<Vec2> surfaceSample = m_rect->sampleSurface();
-    Vec3 wP = surfaceSample.sample.x * m_rect->m_u + surfaceSample.sample.y * m_rect->m_v + m_rect->m_center;
-    return {surfaceSample.sample, surfaceSample.invPDF, wP};
+    Vec3 wP = surfaceSample.s.x * m_rect->m_u + surfaceSample.s.y * m_rect->m_v + m_rect->m_center;
+    return {surfaceSample.s, surfaceSample.invPdf, wP};
 }
 
 Photon RectangleLight::shootPhoton(float weight)

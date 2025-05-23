@@ -1,6 +1,5 @@
-#include <cmath>
-
 #include "integrator.h"
+#include "bsdf.h"
 #include "defs.h"
 #include "material.h"
 #include "prim.h"
@@ -41,14 +40,12 @@ Vec3 Integrator::traceRay(const Ray& ray, Vec3 throughput, uint32_t depth, float
 
     Lo = computeLo(ray, throughput, rInter, depth, ior);
 
-    Ray outRay;
-    float outRayInvPdf;
-    makeHemisphereRay(rInter.hitPoint, rInter.normal, outRay, outRayInvPdf);
+    //fire new ray
+    Vec3 n = dot(rInter.normal, -ray.d) > 0.0f ? rInter.normal : -rInter.normal;
+    BsdfSample bsdfSample = rInter.mat->getBsdf().sample(rInter.hitPoint, -ray.d, n, ior, rInter.mat->getIor());
 
-    Vec3 brdf = rInter.mat->evalBrdf(outRay.d, ray.d, rInter.hitPoint);
-
-    Vec3 temp = brdf * throughput * dot(rInter.normal, outRay.d) * outRayInvPdf;
-    throughput = throughput * temp;
+    Vec3 contrib = rInter.mat->getBsdf().computeContrib(bsdfSample, n) * rInter.mat->getAlbedo();
+    throughput = throughput * contrib;
 
     float zeta = Sampler::the().sampleUniformUnitInterval();
     float p = std::max(std::min(1.0f, max(throughput)), 0.001f);
@@ -56,7 +53,8 @@ Vec3 Integrator::traceRay(const Ray& ray, Vec3 throughput, uint32_t depth, float
     if(zeta < p)
     {
         //bounce
-        Lo = Lo + (temp * traceRay(outRay, throughput, depth + 1, ior)) * (1.0f / p);
+        Ray outRay(bsdfSample.s.wP, bsdfSample.s.wo);
+        Lo = Lo + (contrib * traceRay(outRay, throughput, depth + 1, bsdfSample.s.ior)) * (1.0f / p);
     }
     return Lo;
 }

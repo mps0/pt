@@ -6,6 +6,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_subdirectory(extern)
 
 add_executable( ${PROJECT_NAME}
+    src/bsdf.cpp
+    src/bsdf.h
     src/defs.h
     src/integrator.cpp
     src/integrator.h
@@ -39,6 +41,7 @@ add_executable( ${PROJECT_NAME}
     src/window.cpp
     src/window.h
 )
+
 find_package(OpenGL REQUIRED)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE minifb::minifb)
