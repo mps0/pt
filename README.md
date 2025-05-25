@@ -21,3 +21,6 @@ as well as how photons are shot and how much energy each photon has for
 the two methods to converge to the same result.
 
 
+Photonmap Glass:
+
+<img src="imgs/photonmap_glass.png" width="517">

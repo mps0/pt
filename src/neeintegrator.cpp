@@ -31,35 +31,39 @@ Vec3 NEEIntegrator::computeDirectLigting(const Ray& ray, const Intersection& int
 {
     std::vector<Light*> lights = m_scene.getLights();
     std::vector<std::pair<Vec3, float>> LeSamps;
-    for(Light* l : lights)
+
+    if (!(inter.mat->getBsdf().getFlags() & Bsdf::SPECULAR))
     {
-        Vec3 adjHitPoint = inter.hitPoint + inter.normal * C_EPS;
-        Light::Sample lightSample = l->sample();
-        Vec3 lightVec = lightSample.wP - adjHitPoint;
-
-        Ray lightRay;
-        lightRay.o = adjHitPoint;
-        lightRay.d = normalize(lightVec);
-
-        float lightSamplePdf = 0.f;
-        // light sampling
-        if(queryVisibility(lightRay, length(lightVec)))
+        for(Light* l : lights)
         {
-            // NEE
-            lightSamplePdf = 1.0f / lightSample.invPDF;
-            BsdfSample bsdfSample;
-            bsdfSample.s.ior = inter.mat->getIor();
-            //TODO
-            bsdfSample.s.rho =  C_INV_PI;
-            bsdfSample.s.wP = inter.hitPoint;
-            bsdfSample.s.wo = lightRay.d;
-            bsdfSample.invPdf = 1.0f;
+            Vec3 adjHitPoint = inter.hitPoint + inter.normal * C_EPS;
+            Light::Sample lightSample = l->sample();
+            Vec3 lightVec = lightSample.wP - adjHitPoint;
 
-            Vec3 contrib = inter.mat->getBsdf().computeContrib(bsdfSample) * inter.mat->getAlbedo();
+            Ray lightRay;
+            lightRay.o = adjHitPoint;
+            lightRay.d = normalize(lightVec);
 
-            Vec3 Le = l->evalLe(lightSample, inter.hitPoint) * dot(inter.normal, lightRay.d) * lightSample.invPDF * contrib ;
-            Le = (l->getFlags() & Light::INTERSECTABLE) ? 0.5f * Le : Le;
-            LeSamps.emplace_back(Le, lightSamplePdf);
+            float lightSamplePdf = 0.f;
+            // light sampling
+            if(queryVisibility(lightRay, length(lightVec)))
+            {
+                // NEE
+                lightSamplePdf = 1.0f / lightSample.invPDF;
+                BsdfSample bsdfSample;
+                bsdfSample.s.ior = inter.mat->getIor();
+                //TODO
+                bsdfSample.s.rho =  C_INV_PI;
+                bsdfSample.s.wP = inter.hitPoint;
+                bsdfSample.s.wo = lightRay.d;
+                bsdfSample.invPdf = 1.0f;
+
+                Vec3 contrib = inter.mat->getBsdf().computeContrib(bsdfSample) * inter.mat->getAlbedo();
+
+                Vec3 Le = l->evalLe(lightSample, inter.hitPoint) * dot(inter.normal, lightRay.d) * lightSample.invPDF * contrib ;
+                Le = (l->getFlags() & Light::INTERSECTABLE) ? 0.5f * Le : Le;
+                LeSamps.emplace_back(Le, lightSamplePdf);
+            }
         }
     }
 

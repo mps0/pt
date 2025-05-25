@@ -65,6 +65,5 @@ public:
     Vec3 m_v;
     float m_width;
     float m_height;
-    //TODO
 private:
 };

@@ -1,4 +1,5 @@
 #include "photonintegrator.h"
+#include "bsdf.h"
 
 Vec3 PhotonIntegrator::computeLo(const Ray& ray, Vec3 throughput, const Intersection& inter, uint32_t depth, uint32_t ior)
 {
@@ -15,7 +16,7 @@ Vec3 PhotonIntegrator::computeLo(const Ray& ray, Vec3 throughput, const Intersec
         }
     }
 
-    if(inter.mat->getType() == Material::LAMBERTIAN)
+    if(inter.mat->getBsdf().getFlags() & Bsdf::DIFFUSE)
     {
         // evaluate photons
         std::vector<Photon> photons = m_photonmap.getInterPhotons(m_N, inter);
@@ -42,9 +43,6 @@ Vec3 PhotonIntegrator::computeLo(const Ray& ray, Vec3 throughput, const Intersec
             Lo = Lo + radiance;
         }
     }
-    else
-    {
 
-    }
     return Lo;
 }

@@ -17,8 +17,8 @@ Vec3 Integrator::intersect(Ray& ray)
 Vec3 Integrator::traceRay(const Ray& ray, Vec3 throughput, uint32_t depth, float ior)
 {
     Vec3 Lo = Vec3(0.0f);
-    //if(depth > 0)
-    if(depth > m_maxDepth)
+    if(depth > 2)
+    //if(depth > m_maxDepth)
     {
         return Lo;
     }
@@ -45,12 +45,14 @@ Vec3 Integrator::traceRay(const Ray& ray, Vec3 throughput, uint32_t depth, float
     Vec3 n = dot(rInter.normal, -ray.d) > 0.0f ? rInter.normal : -rInter.normal;
     BsdfSample bsdfSample = rInter.mat->getBsdf().sample(rInter.hitPoint, -ray.d, n, ior, rInter.mat->getIor());
 
-    Vec3 contrib = rInter.mat->getBsdf().computeContrib(bsdfSample) * rInter.mat->getAlbedo() * dot(n, bsdfSample.s.wo);
-    assert(dot(n, bsdfSample.s.wo) >= 0.0f);
+    Vec3 contrib = rInter.mat->getBsdf().computeContrib(bsdfSample) * rInter.mat->getAlbedo();
+
+    contrib = (rInter.mat->getBsdf().getFlags() & Bsdf::SPECULAR) ? contrib : contrib * dot(n, bsdfSample.s.wo);
+
     throughput = throughput * contrib;
 
-    float zeta = Sampler::the().sampleUniformUnitInterval();
-    float p = std::max(std::min(1.0f, max(throughput)), 0.001f);
+    float zeta = Sampler::the().sampleUniformUnitInterval() + 0.1f;
+    float p = std::max(max(throughput), 1.0f);
 
     if(zeta < p)
     {
