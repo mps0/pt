@@ -15,7 +15,7 @@ constexpr float FOV = 20.f;
 constexpr float ASPECT_RATIO = 0.75f;
 constexpr float RES_Y = 600.f;
 constexpr float RES_X = RES_Y * ASPECT_RATIO;
-constexpr uint32_t SAMPLES_PER_PIXEL = 1;
+constexpr uint32_t SAMPLES_PER_PIXEL = 100;
 constexpr uint32_t MAX_DEPTH = 6;
 constexpr uint32_t NUM_PHOTONS = 1e5;
 constexpr uint32_t PHOTONS_PER_SAMPLE = 25;
@@ -39,7 +39,7 @@ int main()
     GlassMaterial greenGlass({0.0f, 1.0f, 0.0f});
 
     LightMaterial degenLightMat(Vec3(0.0f), 0.0f);
-    LightMaterial whiteLightMat(Vec3(1.0f), 50.f);
+    LightMaterial whiteLightMat(Vec3(1.0f), 100.f);
     LightMaterial whiteLightMat2(Vec3(1.0f), 150.f);
     LightMaterial yellowLightMat(Vec3(1.0f, 1.0f, 0.0f), 2.5f);
     LightMaterial purpleLightMat(Vec3(1.0f, 0.0f, 1.0f), 2.5f);
@@ -83,13 +83,13 @@ int main()
 
     Window win(RES_X, RES_Y);
 
-    //NEEIntegrator integrator(scene, MAX_DEPTH);
-    //Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL, nullptr);
+    NEEIntegrator integrator(scene, MAX_DEPTH);
+    Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL, nullptr);
     
-    PhotonMap photonmap;
-    photonmap.tracePhotons(scene, NUM_PHOTONS);
-    PhotonIntegrator integrator(scene, MAX_DEPTH, photonmap, PHOTONS_PER_SAMPLE);
-    Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL, &photonmap);
+    //PhotonMap photonmap;
+    //photonmap.tracePhotons(scene, NUM_PHOTONS);
+    //PhotonIntegrator integrator(scene, MAX_DEPTH, photonmap, PHOTONS_PER_SAMPLE);
+    //Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL, &photonmap);
 
     renderer.render();
 

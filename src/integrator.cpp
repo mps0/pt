@@ -17,8 +17,8 @@ Vec3 Integrator::intersect(Ray& ray)
 Vec3 Integrator::traceRay(const Ray& ray, Vec3 throughput, uint32_t depth, float ior)
 {
     Vec3 Lo = Vec3(0.0f);
-    if(depth > 2)
-    //if(depth > m_maxDepth)
+    //if(depth > 2)
+    if(depth > m_maxDepth)
     {
         return Lo;
     }

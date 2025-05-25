@@ -14,7 +14,6 @@ protected:
     Vec3 traceRay(const Ray& ray, Vec3 throughput, uint32_t depth, float ior = 1.0f);
     virtual Vec3 computeLo(const Ray& ray, Vec3 throughput, const Intersection& inter, uint32_t depth, uint32_t ior) = 0;
 
-    //TODO
     bool queryVisibility(const Ray& ray, const float tMax = FLT_MAX);
     Intersection intersectLights(const Ray& ray);
 
