@@ -1,11 +1,11 @@
 #include "photonintegrator.h"
 #include "bsdf.h"
 
-Vec3 PhotonIntegrator::computeLo(const Ray& ray, Vec3 throughput, const Intersection& inter, uint32_t depth, uint32_t ior)
+Vec3 PhotonIntegrator::computeLo(const Ray& ray, const Intersection& inter)
 {
     Vec3 Lo(0.f);
     // emission
-    if(inter.mat->getType() == Material::LIGHT && depth == 0)
+    if(inter.mat->getType() == Material::LIGHT && ray.p.specOnlyPath)
     {
         float cosL = dot(inter.normal, -ray.d);
 

@@ -19,12 +19,11 @@ public:
            Material(std::string name, Vec3 albedo, Bsdf bsdf, Type type, float ior = 1.0f) : m_name(name), m_albedo(albedo), m_bsdf(bsdf), m_type(type), m_ior(ior) {}
 
            virtual Vec3 getRadiantExitance() const;
-           Vec3 getAlbedo();
-           uint32_t getFlags();
-           const std::string& getName();
-           float getIor();
+           Vec3 getAlbedo() const;
+           const std::string& getName() const;
+           float getIor() const;
            Type getType() const;
-           const Bsdf& getBsdf();
+           const Bsdf& getBsdf() const;
 
 protected:
            Bsdf m_bsdf;

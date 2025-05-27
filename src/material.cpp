@@ -1,11 +1,11 @@
 #include "material.h"
 
-Vec3 Material::getAlbedo()
+Vec3 Material::getAlbedo() const
 {
     return m_albedo;
 }
 
-float Material::getIor()
+float Material::getIor() const
 {
     return m_ior;
 }
@@ -19,12 +19,14 @@ Material::Type Material::getType() const
 {
     return m_type;
 }
-const Bsdf& Material::getBsdf()
+
+const Bsdf& Material::getBsdf() const
 {
     return m_bsdf;
 }
 
-const std::string& Material::getName(){ 
+const std::string& Material::getName() const
+{
     return m_name; 
 };
 

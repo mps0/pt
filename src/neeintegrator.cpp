@@ -3,7 +3,7 @@
 #include "defs.h"
 #include "utils.h"
 
-Vec3 NEEIntegrator::computeLo(const Ray& ray, Vec3 throughput, const Intersection& inter, uint32_t depth, uint32_t ior) 
+Vec3 NEEIntegrator::computeLo(const Ray& ray, const Intersection& inter) 
 {
     Vec3 Lo(0.0f);
     // emission
@@ -14,7 +14,7 @@ Vec3 NEEIntegrator::computeLo(const Ray& ray, Vec3 throughput, const Intersectio
         if(cosL > 0.0f)
         {
             Vec3 Le = inter.mat->getRadiantExitance() * C_INV_2PI * cosL;
-            Lo = depth > 0 ? Lo + 0.5f * Le : Lo + Le;
+            Lo = ray.p.depth > 0 ? Lo + 0.5f * Le : Lo + Le;
         }
     }
 
@@ -61,7 +61,7 @@ Vec3 NEEIntegrator::computeDirectLigting(const Ray& ray, const Intersection& int
                 Vec3 contrib = inter.mat->getBsdf().computeContrib(bsdfSample) * inter.mat->getAlbedo();
 
                 Vec3 Le = l->evalLe(lightSample, inter.hitPoint) * dot(inter.normal, lightRay.d) * lightSample.invPDF * contrib ;
-                Le = (l->getFlags() & Light::INTERSECTABLE) ? 0.5f * Le : Le;
+                //Le = (l->getFlags() & Light::INTERSECTABLE) ? 0.5f * Le : Le;
                 LeSamps.emplace_back(Le, lightSamplePdf);
             }
         }
@@ -86,7 +86,7 @@ Vec3 NEEIntegrator::computeDirectLigting(const Ray& ray, const Intersection& int
                 Vec3 contrib = inter.mat->getBsdf().computeContrib(bsdfSample) * bsdfSample.invPdf * dot(outRay.d, inter.normal);
 
                 Vec3 Le = cosWeightedExitance * cosL * C_INV_2PI  * contrib;
-                Le = 0.5f * Le;
+                //Le = 0.5f * Le;
                 LeSamps.emplace_back(Le, 1.0f / std::max(C_EPS, bsdfSample.invPdf));
             }
         }
