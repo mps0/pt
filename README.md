@@ -1,6 +1,8 @@
 A simple pathtracer.
 
-# Building:
+## Building:
+
+#### Linux:
 ```bash
 # clone repo
 git clone git@github.com:mps0/pt.git
@@ -15,7 +17,7 @@ mkdir build && cd build
 cmake .. && cmake --build .
 ```
 
-# Some Renders:
+## Some Renders:
 First render:
 
 <img src="imgs/first.png" width="517">
