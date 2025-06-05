@@ -1,5 +1,20 @@
 A simple pathtracer.
 
+Building:
+```bash
+# clone repo
+git clone git@github.com:mps0/pt.git
+
+# get minifb module
+git submodule update --init
+
+#build folder
+mkdir build && cd build
+
+# configure and build
+cmake .. && cmake --build .
+```
+
 First render:
 
 <img src="imgs/first.png" width="517">
