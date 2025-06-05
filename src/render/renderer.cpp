@@ -8,10 +8,8 @@ void Renderer::render()
     // Launch threads
     int numThreads = std::thread::hardware_concurrency();
 
-    uint32_t tileWidth = 10;
-    uint32_t tileHeight = 10;
-    //uint32_t tileWidth = m_win.getWidth();
-    //uint32_t tileHeight = m_win.getHeight();
+    uint32_t tileWidth = m_renderTileSize;
+    uint32_t tileHeight = m_renderTileSize;
 
     uint32_t ii = 0;
     std::vector<Tile> tiles;
@@ -72,24 +70,27 @@ void Renderer::render()
 
 void Renderer::renderPixel(const Tile& tile)
 {
+    float pixelsPerUnitLength = 0.5f * m_win.getWidth() / std::tan(m_fov);
+    float pixelsPerUnitLengthInv = 1.0f / pixelsPerUnitLength;
+    float halfWinWidth = 0.5f * m_win.getWidth();
+    float halfWinHeight = 0.5f * m_win.getHeight();
+    Vec3 cam_pos = Vec3(0.f, 0.f, 0.f);
+
     for (uint32_t i = tile.i0; i < tile.i0 + tile.height; ++i) {
         for (uint32_t j = tile.j0; j < tile.j0 + tile.width; ++j) {
 
-            float pixelsPerUnitLength = 0.5f * m_win.getWidth() / std::tan(m_fov);
             float xOffset = 0.5f;
             float yOffset = 0.5f;
 
-            float x = (float(j) + xOffset - 0.5f * m_win.getWidth()) / pixelsPerUnitLength;
-            float y = (float(i) + yOffset - 0.5f * m_win.getHeight()) / pixelsPerUnitLength;
+            float x = (float(j) + xOffset - halfWinWidth) * pixelsPerUnitLengthInv;
+            float y = (float(i) + yOffset - halfWinHeight) * pixelsPerUnitLengthInv;
             y *= -1.f;
 
-            Vec3 cam_pos = Vec3(0.f, 0.f, 0.f);
             Vec3 pix_pos = Vec3(x, y, -1.f);
 
             Ray ray;
             ray.o = Vec3(0.f, 0.f, 0.f);
             ray.d = normalize(pix_pos - cam_pos);
-
             m_accum[i * m_win.getWidth() + j] = m_accum[i * m_win.getWidth() + j] + m_integrator.intersect(ray);
         }
     }

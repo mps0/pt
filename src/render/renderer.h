@@ -3,20 +3,26 @@
 #include "render/window.h"
 #include "render/scene.h"
 #include "integrators/integrator.h"
-#include "photonmap/photonmap.h"
 #include <mutex>
 #include <queue>
 
 class Renderer
 {
-public: Renderer(Window& win, Scene& scene, Integrator& integrator, float fov, uint32_t samplesPerPixel, PhotonMap* photonmap = nullptr) : m_win(win), m_scene(scene), m_integrator(integrator), m_fov(fov), m_samplesPerPixel(samplesPerPixel), m_photonmap(photonmap)
+public: 
+    Renderer(Window& win,
+            Scene& scene, 
+            Integrator& integrator,
+            float fov,
+            uint32_t samplesPerPixel,
+            uint32_t renderTileSize) : 
+        m_win(win),
+        m_scene(scene),
+        m_integrator(integrator),
+        m_fov(fov),
+        m_samplesPerPixel(samplesPerPixel),
+        m_renderTileSize(renderTileSize),
+        m_accum(m_win.getHeight() * m_win.getWidth())
     {
-        m_accum = reinterpret_cast<Vec3*>(calloc(m_win.getHeight() * m_win.getWidth(), sizeof(Vec3)));
-    }
-
-    ~Renderer()
-    {
-        free(m_accum);
     }
 
     void render();
@@ -38,9 +44,9 @@ private:
     Integrator& m_integrator;
     float m_fov;
     uint32_t m_samplesPerPixel;
-    Vec3* m_accum;
-    PhotonMap* m_photonmap;
+    uint32_t m_renderTileSize;
 
+    std::vector<Vec3> m_accum;
     std::mutex m_queueMutex;
     std::mutex m_winMutex;
     std::queue<Tile> m_tileQueue;

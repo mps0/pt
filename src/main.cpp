@@ -1,7 +1,9 @@
+#include "integrator.h"
 #include "lights/light.h"
 #include "materials/material.h"
 #include "integrators/photonintegrator.h"
 #include "integrators/neeintegrator.h".h"
+#include <memory>
 #include "photonmap/photonmap.h"
 #include "utils/utils.h"
 #include "utils/vec.h"
@@ -18,9 +20,45 @@ constexpr uint32_t SAMPLES_PER_PIXEL = 10000;
 constexpr uint32_t MAX_DEPTH = 6;
 constexpr uint32_t NUM_PHOTONS = 1000;
 constexpr uint32_t PHOTONS_PER_SAMPLE = 25;
+constexpr uint32_t RENDER_TILE_SIZE = 10;
 
-int main()
+enum IntegratorSelection : uint32_t
 {
+    NEE = 0,
+    PHOTONMAP = 1
+};
+
+int main(int argc, char* argv[])
+{
+    IntegratorSelection selection;
+    if(argc < 2)
+    {
+        std::cout << "no renderer provided, defaulting to NEE!" << std::endl;
+        selection = NEE;
+    }
+    else if (argc == 2)
+    {
+        std::string input = argv[1];
+        if (input == "nee")
+        {
+            selection = NEE;
+        }
+        else if(input == "photonmap")
+        {
+            selection = PHOTONMAP;
+        }
+        else
+        {
+            selection = NEE;
+            std::cout << "input integrator: " << input << " not recognized, defaulting to nee" << std::endl;
+        }
+    }
+    else
+    {
+        std::cout << "too many inputs provided!" << std::endl;
+        return -1;
+    }
+
     LambertianMaterial red({1.f, 0.f, 0.f});
     LambertianMaterial green({0.f, 1.f, 0.f});
     LambertianMaterial blue({0.f, 0.f, 1.f});
@@ -84,14 +122,25 @@ int main()
 
     Window win(RES_X, RES_Y);
 
-    NEEIntegrator integrator(scene, MAX_DEPTH);
-    Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL, nullptr);
-    
-    //PhotonMap photonmap;
-    //photonmap.tracePhotons(scene, NUM_PHOTONS);
-    //PhotonIntegrator integrator(scene, MAX_DEPTH, photonmap, PHOTONS_PER_SAMPLE);
-    //Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL, &photonmap);
+    PhotonMap photonmap;
+    std::unique_ptr<Integrator> integrator;
+    switch(selection)
+    {
+        case NEE:
+            {
+                integrator = std::make_unique<NEEIntegrator>(scene, MAX_DEPTH);
+                break;
+            }
 
+        case PHOTONMAP:
+            {
+                photonmap.tracePhotons(scene, NUM_PHOTONS);
+                integrator = std::make_unique<PhotonIntegrator>(scene, MAX_DEPTH, photonmap, PHOTONS_PER_SAMPLE);
+                break;
+            }
+    }
+
+    Renderer renderer(win, scene, *integrator, degToRad(FOV), SAMPLES_PER_PIXEL, RENDER_TILE_SIZE);
     renderer.render();
 
     return 0;
