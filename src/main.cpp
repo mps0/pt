@@ -1,15 +1,14 @@
-#include "light.h"
-#include "material.h"
-#include "neeintegrator.h"
-#include "photonintegrator.h"
-#include "photonmap.h"
-#include "utils.h"
-#include "vec.h"
-#include "window.h"
-#include "renderer.h"
-#include "scene.h"
-#include "prim.h"
-#include "utils.h"
+#include "lights/light.h"
+#include "materials/material.h"
+#include "integrators/photonintegrator.h"
+#include "integrators/neeintegrator.h".h"
+#include "photonmap/photonmap.h"
+#include "utils/utils.h"
+#include "utils/vec.h"
+#include "render/window.h"
+#include "render/renderer.h"
+#include "render/scene.h"
+#include "render/prim.h"
 
 constexpr float FOV = 20.f;
 constexpr float ASPECT_RATIO = 0.75f;
@@ -17,8 +16,8 @@ constexpr float RES_Y = 600.f;
 constexpr float RES_X = RES_Y * ASPECT_RATIO;
 constexpr uint32_t SAMPLES_PER_PIXEL = 10000;
 constexpr uint32_t MAX_DEPTH = 6;
-constexpr uint32_t NUM_PHOTONS = 1e7;
-constexpr uint32_t PHOTONS_PER_SAMPLE = 250;
+constexpr uint32_t NUM_PHOTONS = 1000;
+constexpr uint32_t PHOTONS_PER_SAMPLE = 25;
 
 int main()
 {
@@ -85,13 +84,13 @@ int main()
 
     Window win(RES_X, RES_Y);
 
-    //NEEIntegrator integrator(scene, MAX_DEPTH);
-    //Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL, nullptr);
+    NEEIntegrator integrator(scene, MAX_DEPTH);
+    Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL, nullptr);
     
-    PhotonMap photonmap;
-    photonmap.tracePhotons(scene, NUM_PHOTONS);
-    PhotonIntegrator integrator(scene, MAX_DEPTH, photonmap, PHOTONS_PER_SAMPLE);
-    Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL, &photonmap);
+    //PhotonMap photonmap;
+    //photonmap.tracePhotons(scene, NUM_PHOTONS);
+    //PhotonIntegrator integrator(scene, MAX_DEPTH, photonmap, PHOTONS_PER_SAMPLE);
+    //Renderer renderer(win, scene, integrator, degToRad(FOV), SAMPLES_PER_PIXEL, &photonmap);
 
     renderer.render();
 
