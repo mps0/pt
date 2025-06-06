@@ -8,7 +8,7 @@
 
 class KDTree
 {
-public:
+  public:
     static constexpr size_t INVALID_INDEX = SIZE_MAX;
     struct Node
     {
@@ -19,25 +19,22 @@ public:
 
         Node() {}
 
-        Node(Photon& _photon, 
-                size_t _depth,
-                size_t _left = INVALID_INDEX,
-                size_t _right = INVALID_INDEX) : 
-            photon(_photon), 
-            depth(_depth), 
-            left(_left), 
-            right(_right) {}
+        Node(Photon& _photon, size_t _depth, size_t _left = INVALID_INDEX,
+             size_t _right = INVALID_INDEX)
+            : photon(_photon), depth(_depth), left(_left), right(_right)
+        {
+        }
 
         bool hasChildren() const;
     };
 
-    void createTree(std::vector<Photon>& data);
-    void search(const Vec3& x, MaxHeap& heap, size_t  rootIdx, uint8_t dim) const;
+    void        createTree(std::vector<Photon>& data);
+    void        search(const Vec3& x, MaxHeap& heap, size_t rootIdx, uint8_t dim) const;
     const Node& getNode(size_t idx) const;
 
-private:
-
-    size_t createNode(size_t start, size_t last, size_t depth, uint8_t sortDim, std::vector<Photon>& photons);
+  private:
+    size_t createNode(size_t start, size_t last, size_t depth, uint8_t sortDim,
+                      std::vector<Photon>& photons);
 
     std::vector<Node> m_tree;
 };

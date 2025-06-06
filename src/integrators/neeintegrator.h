@@ -4,11 +4,10 @@
 
 class NEEIntegrator : public Integrator
 {
-public:
+  public:
     NEEIntegrator(const Scene& scene, uint32_t maxDepth) : Integrator(scene, maxDepth) {}
 
-private:
+  private:
     virtual Vec3 computeLo(const Ray& ray, const Intersection& inter) override;
-Vec3 computeDirectLigting(const Ray& ray, const Intersection& inter);
-
+    Vec3         computeDirectLigting(const Ray& ray, const Intersection& inter);
 };

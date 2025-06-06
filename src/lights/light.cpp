@@ -2,9 +2,9 @@
 #include "utils/defs.h"
 #include "utils/sampler.h"
 #include "utils/utils.h"
+#include <memory>
 
-
-Light::Sample PointLight::sample() 
+Light::Sample PointLight::sample()
 {
     return {Vec2(0.f), 1.0f, m_pos};
 }
@@ -23,7 +23,7 @@ Vec3 PointLight::evalLe(Sample sample, Vec3 p)
 {
     Vec3 v = sample.wP - p;
 
-    return  (m_mat->getRadiantExitance() *  C_INV_4PI) / std::max(dot(v,v), C_EPS) * sample.invPDF;
+    return (m_mat->getRadiantExitance() * C_INV_4PI) / std::max(dot(v, v), C_EPS) * sample.invPDF;
 }
 
 Vec3 PointLight::getTotalPower()
@@ -32,15 +32,16 @@ Vec3 PointLight::getTotalPower()
     return m_mat->getRadiantExitance();
 }
 
-Prim* RectangleLight::getPrim()
+std::shared_ptr<Prim> RectangleLight::getPrim()
 {
-    return reinterpret_cast<Prim*>(m_rect);
+    return m_rect;
 }
 
 Light::Sample RectangleLight::sample()
 {
     RandomSample<Vec2> surfaceSample = m_rect->sampleSurface();
-    Vec3 wP = surfaceSample.s.x * m_rect->getU() + surfaceSample.s.y * m_rect->getV()+ m_rect->getCenter();
+    Vec3 wP = surfaceSample.s.x * m_rect->getU() + surfaceSample.s.y * m_rect->getV() +
+              m_rect->getCenter();
     return {surfaceSample.s, surfaceSample.invPdf, wP};
 }
 
@@ -48,9 +49,10 @@ Photon RectangleLight::shootPhoton(float weight)
 {
     Sample lightSample = sample();
 
-    Ray photonRay;
+    Ray   photonRay;
     float invPdf;
-    makeHemisphereRay(lightSample.wP + C_EPS * m_rect->getNormal(), m_rect->getNormal(), photonRay, invPdf);
+    makeHemisphereRay(lightSample.wP + C_EPS * m_rect->getNormal(), m_rect->getNormal(), photonRay,
+                      invPdf);
 
     Photon photon;
     photon.wPos = photonRay.o;
@@ -62,10 +64,10 @@ Photon RectangleLight::shootPhoton(float weight)
 
 Vec3 RectangleLight::evalLe(Sample sample, Vec3 p)
 {
-    Vec3 v = sample.wP - p;
+    Vec3  v    = sample.wP - p;
     float cosL = -dot(m_rect->getNormal(), normalize(v));
 
-    if(cosL > 0.0f)
+    if (cosL > 0.0f)
     {
         // Since the rectangle light has a cosine-weighted emiitance
         // and E[cos] = 2 / pi

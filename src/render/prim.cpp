@@ -3,13 +3,13 @@
 
 Intersection Sphere::Intersect(const Ray& ray)
 {
-    Vec3 oc = ray.o - m_center;
-    float a = dot(ray.d, ray.d);
-    float b = 2.0f * dot(oc, ray.d);
-    float c = dot(oc, oc) - m_radius * m_radius;
+    Vec3  oc      = ray.o - m_center;
+    float a       = dot(ray.d, ray.d);
+    float b       = 2.0f * dot(oc, ray.d);
+    float c       = dot(oc, oc) - m_radius * m_radius;
     float descrim = b * b - 4.0f * a * c;
 
-    if(descrim < 0.0f)
+    if (descrim < 0.0f)
     {
         return Intersection::NoHit;
     }
@@ -17,15 +17,15 @@ Intersection Sphere::Intersect(const Ray& ray)
     float sqrtDescrim = std::sqrtf(descrim);
 
     float temp = b <= -sqrtDescrim ? (-b - sqrtDescrim) : (-b + sqrtDescrim);
-    float t = temp / (2.f * a);
+    float t    = temp / (2.f * a);
 
-    if(t < 0.f)
+    if (t < 0.f)
     {
         return Intersection::NoHit;
     }
 
     Vec3 hitPoint = ray.o + t * ray.d;
-    Vec3 normal = normalize(hitPoint - m_center);
+    Vec3 normal   = normalize(hitPoint - m_center);
 
     return {true, t, hitPoint, normal, m_mat};
 }
@@ -44,12 +44,12 @@ RandomSample<Vec2> Sphere::sampleSurface()
 Intersection Rectangle::Intersect(const Ray& ray)
 {
     float denom = dot(ray.d, m_normal);
-    if(denom >= 0.f)
+    if (denom >= 0.f)
     {
         return Intersection::NoHit;
     }
 
-    Vec3 oc = ray. o - m_center;
+    Vec3 oc = ray.o - m_center;
 
     float t = -dot(oc, m_normal) / denom;
 
@@ -61,11 +61,10 @@ Intersection Rectangle::Intersect(const Ray& ray)
     hitPointOS.x = dot(pc, m_u);
     hitPointOS.y = dot(pc, m_v);
 
-    if(std::abs(hitPointOS.x) > 0.5f * m_width || std::abs(hitPointOS.y) >  0.5f * m_height)
+    if (std::abs(hitPointOS.x) > 0.5f * m_width || std::abs(hitPointOS.y) > 0.5f * m_height)
     {
         return Intersection::NoHit;
     }
-    
 
     return {true, t, hitPoint, m_normal, m_mat};
 }

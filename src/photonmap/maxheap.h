@@ -9,16 +9,15 @@ using IdxDist = std::pair<size_t, float>;
 
 class MaxHeap
 {
-public:
+  public:
     MaxHeap(size_t size) : m_size(size) {}
 
-    bool insert(IdxDist e);
-    float getMaxDist() const;
+    bool                        insert(IdxDist e);
+    float                       getMaxDist() const;
     const std::vector<IdxDist>& getHeap();
-    std::string print();
+    std::string                 print();
 
-private:
-
-    size_t m_size;
+  private:
+    size_t               m_size;
     std::vector<IdxDist> m_heap;
 };

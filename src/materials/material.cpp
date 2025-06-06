@@ -27,11 +27,10 @@ const Bsdf& Material::getBsdf() const
 
 const std::string& Material::getName() const
 {
-    return m_name; 
+    return m_name;
 };
 
 Vec3 LightMaterial::getRadiantExitance() const
 {
     return m_color * m_intensity; // [W / m2]
 }
-

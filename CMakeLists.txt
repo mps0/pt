@@ -16,8 +16,10 @@ add_executable( ${PROJECT_NAME}
     src/main.cpp
     src/lights/light.h
     src/lights/light.cpp
+    src/scene/scene.h
+    src/scene/scenes.h
+    src/scene/scenes.cpp
     src/render/prim.cpp
-    src/render/scene.h
     src/render/window.cpp
     src/render/renderer.cpp
     src/render/prim.h
