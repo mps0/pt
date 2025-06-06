@@ -7,16 +7,14 @@ struct Photon
     Vec3 flux;
     Vec3 wPos;
     Vec3 wDir;
-    //Vec3 normal;
-    //float phi;
-    //float theta;
 
-    Photon() {}
-    Photon(Vec3 _wPos)  : wPos(_wPos) {}
-
-    void print()
+    std::string print()
     {
-        std::cout << "PHOTON flux: "; ::print(flux); std::cout << std::endl;
-        std::cout << "PHOTON wPos: "; ::print(wPos); std::cout << std::endl;
+        std::string ret;
+        ret += "flux: " + ::print(flux) + "\n";
+        ret += "wPos: " + ::print(wPos) + "\n";
+        ret += "wDir: " + ::print(wPos) + "\n";
+
+        return ret;
     }
 };

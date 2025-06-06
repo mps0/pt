@@ -40,7 +40,7 @@ Prim* RectangleLight::getPrim()
 Light::Sample RectangleLight::sample()
 {
     RandomSample<Vec2> surfaceSample = m_rect->sampleSurface();
-    Vec3 wP = surfaceSample.s.x * m_rect->m_u + surfaceSample.s.y * m_rect->m_v + m_rect->m_center;
+    Vec3 wP = surfaceSample.s.x * m_rect->getU() + surfaceSample.s.y * m_rect->getV()+ m_rect->getCenter();
     return {surfaceSample.s, surfaceSample.invPdf, wP};
 }
 
@@ -50,7 +50,7 @@ Photon RectangleLight::shootPhoton(float weight)
 
     Ray photonRay;
     float invPdf;
-    makeHemisphereRay(lightSample.wP + C_EPS * m_rect->m_normal, m_rect->m_normal, photonRay, invPdf);
+    makeHemisphereRay(lightSample.wP + C_EPS * m_rect->getNormal(), m_rect->getNormal(), photonRay, invPdf);
 
     Photon photon;
     photon.wPos = photonRay.o;
@@ -63,7 +63,7 @@ Photon RectangleLight::shootPhoton(float weight)
 Vec3 RectangleLight::evalLe(Sample sample, Vec3 p)
 {
     Vec3 v = sample.wP - p;
-    float cosL = -dot(m_rect->m_normal, normalize(v));
+    float cosL = -dot(m_rect->getNormal(), normalize(v));
 
     if(cosL > 0.0f)
     {

@@ -43,12 +43,11 @@ Vec3 Integrator::traceRay(const Ray& ray)
     const Material* mat = rInter.mat;
     const Bsdf& bsdf = mat->getBsdf();
 
-    //fire new ray
+    // fire new ray
     Vec3 n = dot(rInter.normal, -ray.d) > 0.0f ? rInter.normal : -rInter.normal;
     BsdfSample bsdfSample = bsdf.sample(rInter.hitPoint, -ray.d, n, ray.p.ior, mat->getIor());
 
     Vec3 contrib = bsdf.computeContrib(bsdfSample) * mat->getAlbedo();
-
     contrib = (bsdf.getFlags() & Bsdf::SPECULAR) ? contrib : contrib * dot(n, bsdfSample.s.wo);
 
     Vec3 throughput = ray.p.throughput * contrib;

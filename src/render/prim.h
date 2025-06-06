@@ -10,7 +10,7 @@ class Prim
 public:
     Prim(Material* mat, std::string name) : m_mat(mat), m_name(name) {}
     virtual Intersection Intersect(const Ray& ray) = 0;
-    virtual RandomSample<Vec2> sampleSurface() {}
+    virtual RandomSample<Vec2> sampleSurface() = 0;
     virtual float getArea() const = 0;
 
     const std::string& getName(){ return m_name; };
@@ -29,6 +29,7 @@ public:
         m_radius(radius) {}
 
     virtual Intersection Intersect(const Ray& ray) override;
+    virtual RandomSample<Vec2> sampleSurface() override;
     virtual float getArea() const override;
 
 private:
@@ -39,28 +40,32 @@ private:
 class Rectangle : public Prim
 {
 public:
-    Rectangle(Material* mat, Vec3 center, Vec3 u, Vec3 v, float width, float height, std::string name = "Rectangle") :
+    Rectangle(Material* mat, Vec3 center, Vec3 u, Vec3 v, std::string name = "Rectangle") :
         Prim(mat, name),
         m_center(center),
         m_u(normalize(u)),
         m_v(normalize(v)),
-        m_width(width),
-        m_height(height)
+        m_normal(normalize(cross(m_u, m_v))),
+        m_width(length(u)),
+        m_height(length(v))
         {
-            m_normal = normalize(cross(m_u, m_v));
         }
 
     virtual Intersection Intersect(const Ray& ray) override;
     virtual RandomSample<Vec2> sampleSurface() override;
     virtual float getArea() const override;
     RandomSample<Vec2> sampleSurfaceWS();
+    Vec3 getU() const;
+    Vec3 getV() const;
+    Vec3 getCenter() const;
+    Vec3 getNormal() const;
 
-    //TODO why evne have width and height instead of just using uv and v?
+private:
+
     Vec3 m_center;
-    Vec3 m_normal;
     Vec3 m_u;
     Vec3 m_v;
+    Vec3 m_normal;
     float m_width;
     float m_height;
-private:
 };

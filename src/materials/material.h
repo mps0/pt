@@ -16,7 +16,7 @@ public:
     };
 
 
-           Material(std::string name, Vec3 albedo, Bsdf bsdf, Type type, float ior = 1.0f) : m_name(name), m_albedo(albedo), m_bsdf(bsdf), m_type(type), m_ior(ior) {}
+           Material(std::string name, Vec3 albedo, Bsdf bsdf, Type type, float ior = 1.0f) : m_bsdf(bsdf), m_name(name), m_albedo(albedo), m_type(type), m_ior(ior) {}
 
            virtual Vec3 getRadiantExitance() const;
            Vec3 getAlbedo() const;
@@ -37,9 +37,6 @@ class LambertianMaterial : public Material
 {
 public:
     LambertianMaterial(Vec3 albedo, std::string name = "LambertianMaterial") : Material(name, albedo, Bsdf(Bsdf::DIFFUSE), LAMBERTIAN) {}
-
-private:
-    float m_eta;
 };
 
 class LightMaterial : public Material

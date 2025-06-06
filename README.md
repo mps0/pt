@@ -17,6 +17,15 @@ mkdir build && cd build
 cmake .. && cmake --build .
 ```
 
+## Running:
+```bash
+# NEE integrator
+./pt nee
+
+# Photonmap integrator
+./pt photonmap
+```
+
 ## Some Renders:
 First render:
 

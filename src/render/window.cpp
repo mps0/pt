@@ -1,10 +1,10 @@
 #include "render/window.h"
 
 Window::Window(uint32_t width, uint32_t height) :
+    m_buf(width * height),
     m_width(width),
     m_height(height),
     m_init(false),
-    m_buf(nullptr),
     m_win(nullptr)
 {
     m_win = mfb_open_ex("", width, height, 0x0);
@@ -15,20 +15,11 @@ Window::Window(uint32_t width, uint32_t height) :
     }
     m_init = true;
 
-    m_buf = reinterpret_cast<uint32_t*>(calloc(m_width * m_height, sizeof(uint32_t)));
-}
-
-Window::~Window()
-{
-    if(m_buf != nullptr)
-    {
-        free(m_buf);
-    }
 }
 
 bool Window::update()
 {
-    if(mfb_update_ex(m_win, m_buf, m_width, m_height) < 0)
+    if(mfb_update_ex(m_win, m_buf.data(), m_width, m_height) < 0)
     {
         m_win = nullptr;
         return false;

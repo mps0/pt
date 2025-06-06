@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -14,7 +15,7 @@ public:
     bool insert(IdxDist e);
     float getMaxDist() const;
     const std::vector<IdxDist>& getHeap();
-    void print();
+    std::string print();
 
 private:
 

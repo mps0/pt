@@ -5,9 +5,7 @@
 
 void Renderer::render()
 {
-    // Launch threads
     int numThreads = std::thread::hardware_concurrency();
-
     uint32_t tileWidth = m_renderTileSize;
     uint32_t tileHeight = m_renderTileSize;
 
@@ -35,7 +33,6 @@ void Renderer::render()
             m_tileQueue.push(t);
         }
 
-        // Launch threads
         std::vector<std::thread> threads;
         for (int i = 0; i < numThreads; ++i) {
             threads.emplace_back(&Renderer::worker, this);
