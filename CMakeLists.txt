@@ -6,40 +6,52 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_subdirectory(extern)
 
 add_executable( ${PROJECT_NAME}
-    src/bsdf.cpp
-    src/bsdf.h
-    src/defs.h
-    src/integrator.cpp
-    src/integrator.h
-    src/intersection.h
-    src/kdtree.cpp
-    src/kdtree.h
-    src/light.cpp
-    src/light.h
+    src/utils/photon.h
+    src/utils/ray.h
+    src/utils/vec.h
+    src/utils/defs.h
+    src/utils/utils.h
+    src/utils/sampler.h
+    src/utils/pixel.h
     src/main.cpp
-    src/material.cpp
-    src/material.h
-    src/maxheap.cpp
-    src/maxheap.h
-    src/neeintegrator.cpp
-    src/neeintegrator.h
-    src/photon.h
-    src/photonintegrator.cpp
-    src/photonintegrator.h
-    src/photonmap.cpp
-    src/photonmap.h
-    src/pixel.h
-    src/prim.cpp
-    src/prim.h
-    src/ray.h
-    src/renderer.cpp
-    src/renderer.h
-    src/sampler.h
-    src/scene.h
-    src/utils.h
-    src/vec.h
-    src/window.cpp
-    src/window.h
+    src/lights/light.h
+    src/lights/light.cpp
+    src/scene/scene.h
+    src/scene/scenes.h
+    src/scene/scenes.cpp
+    src/render/prim.cpp
+    src/render/window.cpp
+    src/render/renderer.cpp
+    src/render/prim.h
+    src/render/intersection.h
+    src/render/window.h
+    src/render/renderer.h
+    src/photonmap/kdtree.cpp
+    src/photonmap/maxheap.h
+    src/photonmap/photonmap.cpp
+    src/photonmap/kdtree.h
+    src/photonmap/photonmap.h
+    src/photonmap/maxheap.cpp
+    src/materials/bsdf.cpp
+    src/materials/material.h
+    src/materials/bsdf.h
+    src/materials/material.cpp
+    src/integrators/integrator.h
+    src/integrators/photonintegrator.h
+    src/integrators/photonintegrator.cpp
+    src/integrators/integrator.cpp
+    src/integrators/neeintegrator.cpp
+    src/integrators/neeintegrator.h
+)
+
+target_include_directories(${PROJECT_NAME} PRIVATE
+    src/
+    src/utils
+    src/lights
+    src/render
+    src/photonmap
+    src/materials
+    src/integrators
 )
 
 find_package(OpenGL REQUIRED)
@@ -47,5 +59,9 @@ find_package(OpenGL REQUIRED)
 target_link_libraries(${PROJECT_NAME} PRIVATE minifb::minifb)
 
 target_compile_options(${PROJECT_NAME} PRIVATE
-    -Wall -Wextra -Wpedantic -Wfatal-errors
+    -Wall
+    -Wextra
+    -Wfatal-errors
+    -Werror
+    -Wno-unused-parameter 
 )

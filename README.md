@@ -1,5 +1,32 @@
 A simple pathtracer.
 
+## Building:
+
+#### Linux:
+```bash
+# clone repo
+git clone git@github.com:mps0/pt.git
+
+# get minifb module
+git submodule update --init
+
+# build folder
+mkdir build && cd build
+
+# configure and build
+cmake .. && cmake --build .
+```
+
+## Running:
+```bash
+# NEE integrator
+./pt nee
+
+# Photonmap integrator
+./pt photonmap
+```
+
+## Some Renders:
 First render:
 
 <img src="imgs/first.png" width="517">
@@ -19,7 +46,6 @@ Photonmap:
 Care has to be taken with how lights are sampled (directly or indirectly),
 as well as how photons are shot and how much energy each photon has for
 the two methods to converge to the same result.
-
 
 Photonmap Glass:
 
