@@ -50,3 +50,7 @@ the two methods to converge to the same result.
 Photonmap Glass:
 
 <img src="imgs/photonmap_glass.png" width="517">
+
+Gamma Correction:
+
+<img src="imgs/gammaCorrected.png" width="517">

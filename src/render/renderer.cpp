@@ -1,4 +1,5 @@
 #include "render/renderer.h"
+#include "utils.h"
 #include "utils/vec.h"
 
 #include <thread>
@@ -49,7 +50,9 @@ void Renderer::render()
             for (uint32_t j = 0; j < m_win.getWidth(); ++j)
             {
                 Vec3 weighted = m_accum[i * m_win.getWidth() + j] * (1.0f / sampsAccumed);
-                m_win.writePixel(i, j, Pixel(clampZeroToOne(weighted), 1.0f));
+                Vec3 gammaCorrected = gammaCorrect(weighted);
+
+                m_win.writePixel(i, j, Pixel(clampZeroToOne(gammaCorrected), 1.0f));
             }
         }
         std::cout << "UPDATING IMAGE, TOTAL SAMPLES: " << sampsAccumed << std::endl;

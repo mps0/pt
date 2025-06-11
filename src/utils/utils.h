@@ -59,3 +59,15 @@ inline bool refractAndGetFresnel(const Vec<3>& wi, const Vec<3>& normal, const f
 
     return refracted;
 }
+
+inline Vec3 gammaCorrect(Vec3 color)
+{
+    Vec3 corrected;
+    constexpr float invGamma = 1.0f / 2.2f;
+    for(int i = 0; i < 3; ++ i)
+    {
+        corrected[i] =  std::pow(color[i], invGamma); 
+    }
+
+    return corrected;
+}
